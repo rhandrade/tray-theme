@@ -67,7 +67,7 @@ program
         let api = new Api(answers.key, answers.password, answers.theme_id);
         let response = await api.checkConfiguration();
 
-        if(!response.authentication){
+        if(!response.success){
             console.log(chalk`{red [Fail]} Api key, password or theme id not correctly. Please verify and tray again.`);
             process.exit();
         }
@@ -77,12 +77,12 @@ program
             api_key     : answers.key,
             password    : answers.password,
             theme_id    : answers.theme_id,
-            preview_url : response.preview
+            preview_url : response.preview_url
 
         }, { forceQuotes : true });
 
         fs.writeFileSync('config.yml', configFileData, 'utf8');
-
+        console.log(chalk`{green [Complete]} Configuration file created with success.`);
 
     });
 

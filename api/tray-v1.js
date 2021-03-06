@@ -16,7 +16,7 @@ class Api{
     checkConfiguration(){
 
         let config = {
-            url    : `${Api.API_URL}${Api.CHECK_URI}`,
+            url    : `${Api.API_URL}/check`,
             method : 'post',
             headers: this.headers,
             params :{
@@ -26,20 +26,30 @@ class Api{
         }
 
         return axios.request(config)
-            .then((response) => response.data)
-            .catch((error) => error.response.data);
+            .then((response) => {
+                return {
+                    success     : true,
+                    preview_url : response.data.preview
+                }
+            })
+            .catch((error) => {
+                return {
+                    success : false,
+                    message : error.response.data.message
+                }
+            });
     }
 
 
 }
 
 Api.GEM_VERSION      = '1.0.4';
-Api.API_URL          = 'https://opencode.tray.com.br/api/';
-Api.CLEAN_CACHE_URI  = 'clean_cache';
+Api.API_URL          = 'https://opencode.tray.com.br/api';
+/*Api.CLEAN_CACHE_URI  = 'clean_cache';
 Api.CHECK_URI        = 'check'
 Api.LIST_URI         = 'list';
 Api.THEME_URI        = 'themes'
-Api.THEME_ASSETS_URI = 'themes/{theme-id}/assets'
+Api.THEME_ASSETS_URI = 'themes/{theme-id}/assets'*/
 
 
 module.exports = Api;
