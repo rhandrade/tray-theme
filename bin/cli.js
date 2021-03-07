@@ -1,17 +1,20 @@
 #!/usr/bin/env node
 
 const { program }   = require('commander');
-const fs            = require('fs');
+
 const chalk         = require('chalk');
 const chokidar      = require('chokidar');
 const inquirer      = require('inquirer');
-const axios         = require('axios');
-const yaml          = require('js-yaml');
+
 
 const packageConfig = require('../package.json');
 const Api           = require('../api/tray-v1');
+const utils         = require('../libs/utils');
 
 
+/**
+ * Create configure file
+ */
 program
     .command('configure')
     .arguments('[key] [password] [theme_id]')
@@ -26,7 +29,7 @@ program
         let answers = {
             key      : key,
             password : password,
-            theme_id : theme_id,
+            themeId : theme_id,
         };
 
         if(!answers.key){
@@ -49,12 +52,12 @@ program
             );
         }
 
-        if(!answers.theme_id){
+        if(!answers.themeId){
             questions.push(
                 {
                     type    : 'input',
                     message : 'Enter theme id',
-                    name    : 'theme_id'
+                    name    : 'themeId'
                 }
             );
         }
@@ -64,30 +67,54 @@ program
             answers = { ...answers, ...missingAnswers};
         }
 
-        let api = new Api(answers.key, answers.password, answers.theme_id);
-        let response = await api.checkConfiguration();
+        let api = new Api(answers.key, answers.password, answers.themeId);
+        let resultCheckConfig = await api.checkConfiguration();
 
-        if(!response.success){
+        if(!resultCheckConfig.success){
             console.log(chalk`{red [Fail]} Api key, password or theme id not correctly. Please verify and tray again.`);
             process.exit();
         }
 
-        let configFileData = yaml.dump({
+        let resultSaveFile = await utils.saveConfigFile(answers.key, answers.password, answers.themeId, resultCheckConfig.previewUrl);
+        if(!resultSaveFile.success){
+            console.log(chalk`{red [Fail]} ${resultSaveFile.message}.`);
+            process.exit();
+        }
 
-            api_key     : answers.key,
-            password    : answers.password,
-            theme_id    : answers.theme_id,
-            preview_url : response.preview_url
-
-        }, { forceQuotes : true });
-
-        fs.writeFileSync('config.yml', configFileData, 'utf8');
-        console.log(chalk`{green [Complete]} Configuration file created with success.`);
+        console.log(chalk`{green [Complete]} ${resultSaveFile.message}`);
 
     });
 
 
+/**
+ * List all themes available at store
+ */
+program
+    .command('themes')
+    .description('List all themes available at store')
+    .action(async () => {
 
+        let resultLoadFile = await utils.loadConfigFile();
+
+        if(!resultLoadFile.success){
+            console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
+            process.exit();
+        }
+
+        let config = resultLoadFile.config;
+
+        let api = new Api(config.key, config.password, config.theme_id);
+        let themesResult = await api.getThemes();
+
+        if(!themesResult.success){
+            console.log(chalk`{red [Fail]} ${themesResult.message}.`);
+            process.exit();
+        }
+
+        console.log(chalk`{green [Complete]} Themes available:`);
+        console.table(themesResult.themes);
+
+    });
 
 
 

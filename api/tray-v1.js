@@ -4,6 +4,12 @@ const axios = require('axios');
 
 class Api{
 
+    /**
+     * Class constructor
+     * @param key
+     * @param password
+     * @param themeId
+     */
     constructor(key, password, themeId){
         this.key      = key;
         this.password = password;
@@ -13,6 +19,10 @@ class Api{
         }
     }
 
+    /**
+     * Check configurations files
+     * @returns Object with previewUrl in success case, or error message otherwise.
+     */
     checkConfiguration(){
 
         let config = {
@@ -28,8 +38,8 @@ class Api{
         return axios.request(config)
             .then((response) => {
                 return {
-                    success     : true,
-                    preview_url : response.data.preview
+                    success    : true,
+                    previewUrl : response.data.preview
                 }
             })
             .catch((error) => {
@@ -40,16 +50,41 @@ class Api{
             });
     }
 
+    /**
+     * Get a list of all themes available at store
+     * @returns Object with themes list in success case, or error message otherwise.
+     */
+    getThemes(){
+
+        let config = {
+            url    : `${Api.API_URL}/list`,
+            method : 'get',
+            headers: this.headers,
+            params :{
+                'gem_version' : Api.GEM_VERSION
+            }
+        }
+
+        return axios.request(config)
+            .then((response) => {
+                return {
+                    success : true,
+                    themes : response.data.themes
+                }
+            })
+            .catch((error) => {
+                return {
+                    success : false,
+                    message : error.response.data.message
+                }
+            });
+
+    }
+
 
 }
 
 Api.GEM_VERSION      = '1.0.4';
 Api.API_URL          = 'https://opencode.tray.com.br/api';
-/*Api.CLEAN_CACHE_URI  = 'clean_cache';
-Api.CHECK_URI        = 'check'
-Api.LIST_URI         = 'list';
-Api.THEME_URI        = 'themes'
-Api.THEME_ASSETS_URI = 'themes/{theme-id}/assets'*/
-
 
 module.exports = Api;
