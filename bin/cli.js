@@ -103,7 +103,7 @@ program
 
         let config = resultLoadFile.config;
 
-        let api = new Api(config.key, config.password, config.theme_id);
+        let api = new Api(config.key, config.password, config.themeId);
         let themesResult = await api.getThemes();
 
         if(!themesResult.success){
@@ -167,15 +167,65 @@ program
 
 
 /**
+ * Clean theme cache on store
+ */
+program
+    .command('clean-cache [theme_id]')
+    .description('Clean theme cache on store', {
+        theme_id : 'Id of theme to clean cache - default: configured theme id'
+    })
+    .action(async (theme_id) => {
+
+        let resultLoadFile = await utils.loadConfigFile();
+
+        if(!resultLoadFile.success){
+            console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
+            process.exit();
+        }
+
+        let config = resultLoadFile.config;
+
+        log(chalk`{blue [Processing]} Cleaning cache from configured theme id ${theme_id ? theme_id : config.themeId}...`);
+
+        let api = new Api(config.key, config.password, config.themeId);
+        let cleanCacheResult = theme_id ? await api.cleanCache(theme_id) : await api.cleanCache();
+
+        if(!cleanCacheResult.success){
+            log(chalk`{red [Fail]} Error from api: ${cleanCacheResult.message}.`);
+            log.done();
+            process.exit();
+        }
+
+        log(chalk`{green [Complete]} Cache from theme with id ${theme_id ? theme_id : config.themeId} cleaned.`);
+        log.done();
+
+    });
+
+
+/**
  * Delete a theme from store
  */
 program
     .command('delete-theme')
     .arguments('<theme_id>')
     .description('Delete a theme from store', {
-        theme_id : 'Id of theme o remove'
+        theme_id : 'Id of theme to remove'
     })
     .action(async (theme_id) => {
+
+        let answer = await inquirer.prompt(
+            {
+                type    : 'confirm',
+                message : 'Do you really want to delete this theme? This action cannot be undone.',
+                name    : 'confirmDelete',
+                default : false,
+            }
+        );
+
+        if(!answer.confirmDelete){
+            console.log(chalk`{red [Aborted]} Deletion of theme ${theme_id} was aborted by user.`);
+            process.exit();
+        }
 
         let resultLoadFile = await utils.loadConfigFile();
 
@@ -188,7 +238,7 @@ program
 
         let config = resultLoadFile.config;
 
-        let api = new Api(config.key, config.password, config.theme_id);
+        let api = new Api(config.key, config.password, config.themeId);
         let deleteResult = await api.deleteTheme(theme_id);
 
         if(!deleteResult.success){

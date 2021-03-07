@@ -126,6 +126,47 @@ class Api{
     }
 
     /**
+     * Clean cache for a theme on store
+     * @param themeId
+     * @returns Object with success true in case of success or error message otherwise.
+     */
+    cleanCache(themeId = this.themeId){
+
+        let config = {
+            url    : `${Api.API_URL}/clean_cache/`,
+            method : 'post',
+            headers: this.headers,
+            params :{
+                theme_id    : themeId,
+                gem_version : Api.GEM_VERSION
+            }
+        }
+
+        return axios.request(config)
+            .then((response) => {
+                if(response.data.response.code !== 200){
+                    return {
+                        success : false,
+                        message : `Unknown error. Details: ${response.data.response.message}`
+                    }
+                } else {
+                    return {
+                        success : true,
+                        message : response.data.response.message
+                    }
+                }
+            })
+            .catch((error) => {
+                return {
+                    success : false,
+                    message : error.response.data.message
+                }
+            });
+
+    }
+
+
+    /**
      * Delete a theme from store
      * @param themeId Id of theme to delete
      * @returns Object with success true in case of success or error message otherwise.
