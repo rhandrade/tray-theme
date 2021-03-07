@@ -125,6 +125,37 @@ class Api{
 
     }
 
+    /**
+     * Delete a theme from store
+     * @param themeId Id of theme to delete
+     * @returns Object with success true in case of success or error message otherwise.
+     */
+    deleteTheme(themeId){
+
+        let config = {
+            url    : `${Api.API_URL}/themes/${themeId}`,
+            method : 'delete',
+            headers: this.headers,
+            params :{
+                'gem_version' : Api.GEM_VERSION
+            }
+        }
+
+        return axios.request(config)
+            .then((response) => {
+                return {
+                    success : true
+                }
+            })
+            .catch((error) => {
+                return {
+                    success : false,
+                    message : error.response.data.message
+                }
+            });
+
+    }
+
 
 }
 

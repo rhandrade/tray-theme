@@ -165,6 +165,43 @@ program
 
     });
 
+
+/**
+ * Delete a theme from store
+ */
+program
+    .command('delete-theme')
+    .arguments('<theme_id>')
+    .description('Delete a theme from store', {
+        theme_id : 'Id of theme o remove'
+    })
+    .action(async (theme_id) => {
+
+        let resultLoadFile = await utils.loadConfigFile();
+
+        if(!resultLoadFile.success){
+            console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
+            process.exit();
+        }
+
+        log(chalk`{blue [Processing]} Deleting theme with id {magenta ${theme_id}} on store...`);
+
+        let config = resultLoadFile.config;
+
+        let api = new Api(config.key, config.password, config.theme_id);
+        let deleteResult = await api.deleteTheme(theme_id);
+
+        if(!deleteResult.success){
+            log(chalk`{red [Fail]} Error from api: ${deleteResult.message}.`);
+            log.done();
+            process.exit();
+        }
+
+        log(chalk`{green [Complete]} Theme with id ${theme_id} deleted.`);
+        log.done();
+
+    });
+
 program.version(packageConfig.version)
     .name(Object.keys(packageConfig.bin)[0]);
 
