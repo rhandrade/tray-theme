@@ -10,7 +10,7 @@ class Api{
      * @param password
      * @param themeId
      */
-    constructor(key, password, themeId){
+    constructor(key, password, themeId = null){
         this.key      = key;
         this.password = password;
         this.themeId  = themeId;
@@ -30,16 +30,19 @@ class Api{
             method : 'post',
             headers: this.headers,
             params :{
-                'theme_id'    : this.themeId,
                 'gem_version' : Api.GEM_VERSION
             }
+        }
+
+        if(this.themeId){
+            config.params['theme_id'] = this.themeId;
         }
 
         return axios.request(config)
             .then((response) => {
                 return {
                     success    : true,
-                    previewUrl : response.data.preview
+                    previewUrl : this.themeId ? response.data.preview : null
                 }
             })
             .catch((error) => {
@@ -70,6 +73,47 @@ class Api{
                 return {
                     success : true,
                     themes : response.data.themes
+                }
+            })
+            .catch((error) => {
+                return {
+                    success : false,
+                    message : error.response.data.message
+                }
+            });
+
+    }
+
+    /**
+     * Create a new theme on store.
+     * @param name Name of the new theme
+     * @param themeBase Name of the base theme
+     * @returns Object with theme id and preview url for created theme or error message otherwise.
+     */
+    createTheme(name, themeBase = 'default'){
+
+        let config = {
+            url    : `${Api.API_URL}/themes`,
+            method : 'post',
+            headers: this.headers,
+            params :{
+                'gem_version' : Api.GEM_VERSION
+            },
+            data :{
+                theme :{
+                    name        : name,
+                    theme_base  : themeBase,
+                    gem_version : Api.GEM_VERSION
+                }
+            }
+        }
+
+        return axios.request(config)
+            .then((response) => {
+                return {
+                    success    : true,
+                    themeId    : response.data.theme_id,
+                    previewUrl : response.data.preview
                 }
             })
             .catch((error) => {

@@ -5,7 +5,7 @@ const { program }   = require('commander');
 const chalk         = require('chalk');
 const chokidar      = require('chokidar');
 const inquirer      = require('inquirer');
-
+const log           = require('log-update');
 
 const packageConfig = require('../package.json');
 const Api           = require('../api/tray-v1');
@@ -117,6 +117,53 @@ program
     });
 
 
+/**
+ * Create a new theme on store
+ */
+program
+    .command('new')
+    .arguments('<key> <password> <theme_name> [theme_base]')
+    .description('Create a new theme in store', {
+        key        : 'Api key',
+        password   : 'Api password',
+        theme_name : 'Name of the theme',
+        theme_base : 'Base theme for this new theme - default: default'
+    })
+    .action(async (key, password, theme_name, theme_base) => {
+
+        let api = new Api(key, password);
+        let resultCheckConfig = await api.checkConfiguration();
+
+        if(!resultCheckConfig.success){
+            console.log(chalk`{red [Fail]} Api key or password not correctly. Please verify and tray again.`);
+            process.exit();
+        }
+
+        log(chalk`{blue [Processing]} Creating theme {magenta ${theme_name}} on store...`);
+        let resultCreationTheme = theme_base ? await api.createTheme(theme_name, theme_base) : await api.createTheme(theme_name);
+
+        if(!resultCreationTheme.success){
+            log(chalk`{red [Fail]} ${resultCreationTheme.message}.`);
+            log.done();
+            process.exit();
+        }
+
+        log(chalk`{green [Complete]} Theme ${theme_name} created on store.`);
+        log.done();
+
+        log(chalk`{blue [Processing]} Creating config file...`);
+
+        let resultSaveFile = await utils.saveConfigFile(key, password, resultCreationTheme.themeId, resultCreationTheme.previewUrl);
+        if(!resultSaveFile.success){
+            log(chalk`{red [Fail]} ${resultSaveFile.message}.`);
+            log.done();
+            process.exit();
+        }
+
+        log(chalk`{green [Complete]} ${resultSaveFile.message}`);
+        log.done();
+
+    });
 
 program.version(packageConfig.version)
     .name(Object.keys(packageConfig.bin)[0]);
