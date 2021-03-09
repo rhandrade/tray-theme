@@ -15,7 +15,8 @@ class Api{
         this.password = password;
         this.themeId  = themeId;
         this.headers  = {
-            'Authorization' : `Token token=${this.key}_${this.password}`
+            'Authorization' : `Token token=${this.key}_${this.password}`,
+            'Accept'        :  'application/json'
         }
     }
 
@@ -192,6 +193,38 @@ class Api{
                 return {
                     success : false,
                     message : error.response.data.message
+                }
+            });
+
+    }
+
+    /**
+     * Get theme assets
+     * @returns Object with assets and its total, error message otherwise.
+     */
+    getThemeAssets(){
+
+        let config = {
+            url    : `${Api.API_URL}/themes/${this.themeId}/assets`,
+            method : 'get',
+            headers: this.headers,
+            params :{
+                'gem_version' : Api.GEM_VERSION
+            }
+        }
+
+        return axios.request(config)
+            .then((response) => {
+                return {
+                    success  : true,
+                    quantity : response.data.meta.total,
+                    assets   : response.data.assets,
+                }
+            })
+            .catch((error) => {
+                return {
+                    success : false,
+                    message : error.response.data.message ?? error.response.data.error
                 }
             });
 
