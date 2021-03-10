@@ -1,6 +1,7 @@
 'use strict';
 
-const axios = require('axios');
+const axios    = require('axios');
+const FileType = require('file-type');
 
 class Api{
 
@@ -220,6 +221,49 @@ class Api{
                     quantity : response.data.meta.total,
                     assets   : response.data.assets,
                 }
+            })
+            .catch((error) => {
+                return {
+                    success : false,
+                    message : error.response.data.message ?? error.response.data.error
+                }
+            });
+
+    }
+
+    /**
+     * Get theme asset content
+     * @returns Object with asset properties and content or error message otherwise.
+     */
+    getThemeAsset(asset){
+
+        let config = {
+            url    : `${Api.API_URL}/themes/${this.themeId}/assets`,
+            method : 'get',
+            headers: this.headers,
+            params :{
+                'key'         : asset,
+                'gem_version' : Api.GEM_VERSION
+            }
+        }
+
+        return axios.request(config)
+            .then(async (response) => {
+
+                let assetContentBuffer = Buffer.from(response.data.content, 'base64');
+                let fileType = await FileType.fromBuffer(assetContentBuffer);
+
+                return {
+                    success : true,
+                    asset :{
+                        key     : response.data.key,
+                        path    : `.${response.data.key}`,
+                        dynamic : Boolean(Number(response.data.dynamic)),
+                        binary  : !!fileType,
+                        content : assetContentBuffer
+                    }
+                }
+
             })
             .catch((error) => {
                 return {
