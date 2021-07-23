@@ -38,7 +38,8 @@ export function saveConfigFile({ key, password, themeId, previewUrl }: IConfigFi
         }));
 }
 
-export function loadConfigFile() {
+export async function loadConfigFile(){
+
     return readFile("config.yml", { encoding: "utf8" })
         .then((data) => {
             const config = yaml.load(data) as IConfigFileLoaded;
@@ -46,13 +47,10 @@ export function loadConfigFile() {
             const { api_key: key, password, theme_id: themeId, preview_url: previewUrl } = config;
 
             return {
-                success: true,
-                config: {
-                    key,
-                    password,
-                    themeId,
-                    previewUrl,
-                },
+                key,
+                password,
+                themeId,
+                previewUrl,
             };
         })
         .catch((error) => ({
