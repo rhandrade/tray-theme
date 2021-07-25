@@ -225,7 +225,47 @@ commander_1.program
     }
     log_update_1.default.done();
 }));
-//
+commander_1.program
+    .command('download')
+    .arguments('[files...]')
+    .action((files) => __awaiter(void 0, void 0, void 0, function* () {
+    let assets = files;
+    const resultLoadFile = yield utils_1.loadConfigFile();
+    if (!resultLoadFile.success) {
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+        process.exit();
+    }
+    const { key, password, themeId } = resultLoadFile.config;
+    const api = new TrayApi_1.TrayApi({ key, password, themeId });
+    if (!assets.length) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue Processing} Listing files that need to be downloaded...`);
+        const themeAssetsResults = yield api.getThemeAssets();
+        if (!themeAssetsResults.success) {
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} Error from api': ${themeAssetsResults.message}.`);
+            process.exit();
+        }
+        assets = themeAssetsResults.assets.map(({ path }) => path);
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green Complete} List retrived.`);
+        log_update_1.default.done();
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] Downloading ${themeAssetsResults.quantity} files...`);
+        log_update_1.default.done();
+    }
+    else {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] Downloading ${assets.length} files...`);
+        log_update_1.default.done();
+    }
+    assets.forEach((file) => __awaiter(void 0, void 0, void 0, function* () {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue Processing} Downloading file '${file}'...`);
+        const response = yield api.getThemeAsset(file.startsWith('/') ? file : `/${file}`);
+        const { path, content } = response.asset;
+        const saveFileResult = yield utils_1.saveAssetFile(path, content);
+        if (!saveFileResult.success) {
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} Error when saving file '${file}'. Error: ${saveFileResult.message}.`);
+        }
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} File '${file}' downloaded.`);
+        log_update_1.default.done();
+    }));
+}));
 commander_1.program
     .command('delete-file')
     .alias('rm')

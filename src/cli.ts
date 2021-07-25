@@ -9,7 +9,7 @@ import log from 'log-update';
 import packageConfig from '../package.json';
 import { TrayApi } from './api/v1/TrayApi';
 
-import { saveConfigFile, loadConfigFile, getCurrentLocalteTime } from './libs/utils';
+import { saveConfigFile, loadConfigFile, getCurrentLocalteTime, saveAssetFile } from './libs/utils';
 
 /**
  * Create configure file
@@ -280,7 +280,65 @@ program
         log.done();
     });
 
-//
+program
+    .command('download')
+    .arguments('[files...]')
+    .action(async (files) => {
+        let assets = files;
+
+        const resultLoadFile: any = await loadConfigFile();
+
+        if (!resultLoadFile.success) {
+            console.log(chalk`[${getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+            process.exit();
+        }
+
+        const { key, password, themeId } = resultLoadFile.config;
+
+        const api = new TrayApi({ key, password, themeId });
+
+        if (!assets.length) {
+            log(chalk`[${getCurrentLocalteTime()}] {blue Processing} Listing files that need to be downloaded...`);
+
+            const themeAssetsResults: any = await api.getThemeAssets();
+
+            if (!themeAssetsResults.success) {
+                log(chalk`[${getCurrentLocalteTime()}] {red Fail} Error from api': ${themeAssetsResults.message}.`);
+                process.exit();
+            }
+            assets = themeAssetsResults.assets.map(({ path }) => path);
+
+            log(chalk`[${getCurrentLocalteTime()}] {green Complete} List retrived.`);
+            log.done();
+
+            log(chalk`[${getCurrentLocalteTime()}] Downloading ${themeAssetsResults.quantity} files...`);
+            log.done();
+        } else {
+            log(chalk`[${getCurrentLocalteTime()}] Downloading ${assets.length} files...`);
+            log.done();
+        }
+
+        assets.forEach(async (file: string) => {
+            log(chalk`[${getCurrentLocalteTime()}] {blue Processing} Downloading file '${file}'...`);
+
+            const response: any = await api.getThemeAsset(file.startsWith('/') ? file : `/${file}`);
+
+            const { path, content } = response.asset;
+
+            const saveFileResult: any = await saveAssetFile(path, content);
+
+            if (!saveFileResult.success) {
+                log(
+                    chalk`[${getCurrentLocalteTime()}] {red Fail} Error when saving file '${file}'. Error: ${
+                        saveFileResult.message
+                    }.`
+                );
+            }
+
+            log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} File '${file}' downloaded.`);
+            log.done();
+        });
+    });
 
 program
     .command('delete-file')

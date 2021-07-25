@@ -1,5 +1,7 @@
+import { existsSync, mkdirSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
 import yaml from 'js-yaml';
+import { dirname } from 'path';
 
 interface IConfigFile {
     key: string;
@@ -63,4 +65,19 @@ export async function loadConfigFile() {
 
 export function getCurrentLocalteTime() {
     return new Date().toLocaleTimeString();
+}
+
+export async function saveAssetFile(path: string, data: Buffer) {
+    const fileDirname = dirname(path);
+
+    if (!existsSync(fileDirname)) {
+        mkdirSync(fileDirname, { recursive: true });
+    }
+
+    return writeFile(path, data)
+        .then(() => ({ success: true }))
+        .catch((error) => ({
+            success: false,
+            message: `Unable to create '${path}' file. ${error}`,
+        }));
 }

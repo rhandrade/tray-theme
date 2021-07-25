@@ -12,9 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getCurrentLocalteTime = exports.loadConfigFile = exports.saveConfigFile = void 0;
+exports.saveAssetFile = exports.getCurrentLocalteTime = exports.loadConfigFile = exports.saveConfigFile = void 0;
+const fs_1 = require("fs");
 const promises_1 = require("fs/promises");
 const js_yaml_1 = __importDefault(require("js-yaml"));
+const path_1 = require("path");
 function saveConfigFile({ key, password, themeId, previewUrl }) {
     const fileDataAsObject = {
         ':api_key': key,
@@ -63,3 +65,18 @@ function getCurrentLocalteTime() {
     return new Date().toLocaleTimeString();
 }
 exports.getCurrentLocalteTime = getCurrentLocalteTime;
+function saveAssetFile(path, data) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const fileDirname = path_1.dirname(path);
+        if (!fs_1.existsSync(fileDirname)) {
+            fs_1.mkdirSync(fileDirname, { recursive: true });
+        }
+        return promises_1.writeFile(path, data)
+            .then(() => ({ success: true }))
+            .catch((error) => ({
+            success: false,
+            message: `Unable to create '${path}' file. ${error}`,
+        }));
+    });
+}
+exports.saveAssetFile = saveAssetFile;
