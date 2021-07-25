@@ -3,13 +3,13 @@
 import { program } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
-// import { LogUpdate } from "log-update";
-// import chokidar from "chokidar";
+import log from 'log-update';
+// import chokidar from 'chokidar';
 
 import packageConfig from '../package.json';
 import { TrayApi } from './api/v1/TrayApi';
 
-import { saveConfigFile, loadConfigFile } from './libs/utils';
+import { saveConfigFile, loadConfigFile, getCurrentLocalteTime } from './libs/utils';
 
 /**
  * Create configure file
@@ -253,25 +253,40 @@ program
 // const fse = require('fs-extra');
 // const path = require('path');
 
-program.command('test').action(async () => {
-    console.log('oi');
-    // let resultLoadFile = await utils.loadConfigFile();
-    // if(!resultLoadFile.success){
-    //     console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
-    //     process.exit();
-    // }
-    // let config = resultLoadFile.config;
-    // let api = new Api(config.key, config.password, config.themeId);
-    // let assetsResult = await api.getThemeAsset('/layouts/default.html');
-    // console.log(assetsResult);
-    /*
+program
+    .command('delete-file')
+    .alias('rm')
+    .arguments('<files...>')
+    .action(async (files: string[]) => {
+        const resultLoadFile: any = await loadConfigFile();
 
-        let dirname = path.dirname(assetsResult.asset.path);
+        if (!resultLoadFile.success) {
+            console.log(chalk`[${getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+            process.exit();
+        }
 
-        fse.ensureDirSync(dirname);
-        fse.writeFileSync(assetsResult.asset.path, assetsResult.asset.content);
-        */
-});
+        const { key, password, themeId } = resultLoadFile.config;
+
+        const api = new TrayApi({ key, password, themeId });
+
+        files.forEach(async (file) => {
+            log(chalk`[${getCurrentLocalteTime()}] {blue Processing} Deleting file '${file}'...`);
+
+            const response: any = await api.deleteThemeAsset(file);
+
+            if (!response.success) {
+                log(
+                    chalk`[${getCurrentLocalteTime()}] {red Fail} Error from api when deleting file '${file}': ${
+                        response.message
+                    }.`
+                );
+            } else {
+                log(chalk`[${getCurrentLocalteTime()}] {green Complete} File '${file}' deleted.`);
+            }
+
+            log.done();
+        });
+    });
 
 program.version(packageConfig.version).name('tray');
 

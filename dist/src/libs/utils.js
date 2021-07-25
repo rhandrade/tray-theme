@@ -12,23 +12,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loadConfigFile = exports.saveConfigFile = void 0;
+exports.getCurrentLocalteTime = exports.loadConfigFile = exports.saveConfigFile = void 0;
 const promises_1 = require("fs/promises");
 const js_yaml_1 = __importDefault(require("js-yaml"));
 function saveConfigFile({ key, password, themeId, previewUrl }) {
     const fileDataAsObject = {
-        api_key: key,
-        theme_id: themeId,
-        preview_url: previewUrl,
-        password,
+        ':api_key': key,
+        ':password': password,
+        ':theme_id': themeId,
+        ':preview_url': previewUrl,
     };
     const configFileData = js_yaml_1.default.dump(fileDataAsObject, {
         forceQuotes: true,
     });
-    return promises_1.writeFile("config.yml", configFileData)
+    return promises_1.writeFile('config.yml', configFileData)
         .then(() => ({
         success: true,
-        message: "Configuration file created with success.",
+        message: 'Configuration file created with success.',
     }))
         .catch((error) => ({
         success: false,
@@ -38,15 +38,18 @@ function saveConfigFile({ key, password, themeId, previewUrl }) {
 exports.saveConfigFile = saveConfigFile;
 function loadConfigFile() {
     return __awaiter(this, void 0, void 0, function* () {
-        return promises_1.readFile("config.yml", { encoding: "utf8" })
+        return promises_1.readFile('config.yml', { encoding: 'utf8' })
             .then((data) => {
             const config = js_yaml_1.default.load(data);
-            const { api_key: key, password, theme_id: themeId, preview_url: previewUrl } = config;
+            const { ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl } = config;
             return {
-                key,
-                password,
-                themeId,
-                previewUrl,
+                success: true,
+                config: {
+                    key,
+                    password,
+                    themeId,
+                    previewUrl,
+                },
             };
         })
             .catch((error) => ({
@@ -56,3 +59,7 @@ function loadConfigFile() {
     });
 }
 exports.loadConfigFile = loadConfigFile;
+function getCurrentLocalteTime() {
+    return new Date().toLocaleTimeString();
+}
+exports.getCurrentLocalteTime = getCurrentLocalteTime;

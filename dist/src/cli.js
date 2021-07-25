@@ -16,8 +16,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const commander_1 = require("commander");
 const chalk_1 = __importDefault(require("chalk"));
 const inquirer_1 = __importDefault(require("inquirer"));
-// import { LogUpdate } from "log-update";
-// import chokidar from "chokidar";
+const log_update_1 = __importDefault(require("log-update"));
+// import chokidar from 'chokidar';
 const package_json_1 = __importDefault(require("../package.json"));
 const TrayApi_1 = require("./api/v1/TrayApi");
 const utils_1 = require("./libs/utils");
@@ -25,12 +25,12 @@ const utils_1 = require("./libs/utils");
  * Create configure file
  */
 commander_1.program
-    .command("configure")
-    .arguments("[key] [password] [theme_id]")
-    .description("Create configuration file", {
-    key: "Api key",
-    password: "Api password",
-    theme_id: "Theme id",
+    .command('configure')
+    .arguments('[key] [password] [theme_id]')
+    .description('Create configuration file', {
+    key: 'Api key',
+    password: 'Api password',
+    theme_id: 'Theme id',
 })
     .action((key, password, theme_id) => __awaiter(void 0, void 0, void 0, function* () {
     const questions = [];
@@ -41,23 +41,23 @@ commander_1.program
     };
     if (!answers.key) {
         questions.push({
-            type: "input",
-            message: "Enter api key",
-            name: "key",
+            type: 'input',
+            message: 'Enter api key',
+            name: 'key',
         });
     }
     if (!answers.password) {
         questions.push({
-            type: "input",
-            message: "Enter api password",
-            name: "password",
+            type: 'input',
+            message: 'Enter api password',
+            name: 'password',
         });
     }
     if (!answers.themeId) {
         questions.push({
-            type: "input",
-            message: "Enter theme id",
-            name: "themeId",
+            type: 'input',
+            message: 'Enter theme id',
+            name: 'themeId',
         });
     }
     if (questions.length > 0) {
@@ -90,8 +90,8 @@ commander_1.program
  * List all themes available at store
  */
 commander_1.program
-    .command("themes")
-    .description("List all themes available at store")
+    .command('themes')
+    .description('List all themes available at store')
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
     const resultLoadFile = yield utils_1.loadConfigFile();
     console.log(resultLoadFile);
@@ -214,24 +214,29 @@ commander_1.program
 //     });
 // const fse = require('fs-extra');
 // const path = require('path');
-commander_1.program.command("test").action(() => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("oi");
-    // let resultLoadFile = await utils.loadConfigFile();
-    // if(!resultLoadFile.success){
-    //     console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
-    //     process.exit();
-    // }
-    // let config = resultLoadFile.config;
-    // let api = new Api(config.key, config.password, config.themeId);
-    // let assetsResult = await api.getThemeAsset('/layouts/default.html');
-    // console.log(assetsResult);
-    /*
-
-        let dirname = path.dirname(assetsResult.asset.path);
-
-        fse.ensureDirSync(dirname);
-        fse.writeFileSync(assetsResult.asset.path, assetsResult.asset.content);
-        */
+commander_1.program
+    .command('delete-file')
+    .alias('rm')
+    .arguments('<files...>')
+    .action((files) => __awaiter(void 0, void 0, void 0, function* () {
+    const resultLoadFile = yield utils_1.loadConfigFile();
+    if (!resultLoadFile.success) {
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+        process.exit();
+    }
+    const { key, password, themeId } = resultLoadFile.config;
+    const api = new TrayApi_1.TrayApi({ key, password, themeId });
+    files.forEach((file) => __awaiter(void 0, void 0, void 0, function* () {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue Processing} Deleting file '${file}'...`);
+        const response = yield api.deleteThemeAsset(file);
+        if (!response.success) {
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} Error from api when deleting file '${file}': ${response.message}.`);
+        }
+        else {
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green Complete} File '${file}' deleted.`);
+        }
+        log_update_1.default.done();
+    }));
 }));
-commander_1.program.version(package_json_1.default.version).name("tray");
+commander_1.program.version(package_json_1.default.version).name('tray');
 commander_1.program.parse(process.argv);

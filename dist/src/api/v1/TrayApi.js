@@ -21,14 +21,14 @@ class TrayApi {
      * @param param0
      */
     constructor({ key, password, themeId = null }) {
-        this.GEM_VERSION = "1.0.4";
-        this.API_URL = "https://opencode.tray.com.br/api";
+        this.GEM_VERSION = '1.0.4';
+        this.API_URL = 'https://opencode.tray.com.br/api';
         this.key = key;
         this.password = password;
         this.themeId = themeId;
         this.headers = {
             Authorization: `Token token=${this.key}_${this.password}`,
-            Accept: "application/json",
+            Accept: 'application/json',
         };
     }
     /**
@@ -38,7 +38,7 @@ class TrayApi {
     checkConfiguration() {
         const config = {
             url: `${this.API_URL}/check`,
-            method: "post",
+            method: 'post',
             headers: this.headers,
             params: {
                 gem_version: this.GEM_VERSION,
@@ -65,7 +65,7 @@ class TrayApi {
     getThemes() {
         const config = {
             url: `${this.API_URL}/list`,
-            method: "get",
+            method: 'get',
             headers: this.headers,
             params: {
                 gem_version: this.GEM_VERSION,
@@ -88,10 +88,10 @@ class TrayApi {
      * @param themeBase Name of the base theme
      * @returns Object with theme id and preview url for created theme or error message otherwise.
      */
-    createTheme(name, themeBase = "default") {
+    createTheme(name, themeBase = 'default') {
         const config = {
             url: `${this.API_URL}/themes`,
-            method: "post",
+            method: 'post',
             headers: this.headers,
             params: {
                 gem_version: this.GEM_VERSION,
@@ -124,7 +124,7 @@ class TrayApi {
     cleanCache(themeId = this.themeId) {
         const config = {
             url: `${this.API_URL}/clean_cache/`,
-            method: "post",
+            method: 'post',
             headers: this.headers,
             params: {
                 theme_id: themeId,
@@ -158,7 +158,7 @@ class TrayApi {
     deleteTheme(themeId) {
         const config = {
             url: `${this.API_URL}/themes/${themeId}`,
-            method: "delete",
+            method: 'delete',
             headers: this.headers,
             params: {
                 gem_version: this.GEM_VERSION,
@@ -179,7 +179,7 @@ class TrayApi {
     getThemeAssets() {
         const config = {
             url: `${this.API_URL}/themes/${this.themeId}/assets`,
-            method: "get",
+            method: 'get',
             headers: this.headers,
             params: {
                 gem_version: this.GEM_VERSION,
@@ -207,7 +207,7 @@ class TrayApi {
     getThemeAsset(asset) {
         const config = {
             url: `${this.API_URL}/themes/${this.themeId}/assets`,
-            method: "get",
+            method: 'get',
             headers: this.headers,
             params: {
                 key: asset,
@@ -217,7 +217,7 @@ class TrayApi {
         return axios_1.default
             .request(config)
             .then((response) => __awaiter(this, void 0, void 0, function* () {
-            const assetContentBuffer = Buffer.from(response.data.content, "base64");
+            const assetContentBuffer = Buffer.from(response.data.content, 'base64');
             const fileType = yield file_type_1.default.fromBuffer(assetContentBuffer);
             return {
                 success: true,
@@ -237,6 +237,38 @@ class TrayApi {
                 message: (_a = error.response.data.message) !== null && _a !== void 0 ? _a : error.response.data.error,
             });
         });
+    }
+    sendThemeAsset() {
+        const config = {
+            url: `${this.API_URL}/themes/${this.themeId}/assets`,
+            method: 'get',
+            headers: this.headers,
+            params: {
+                gem_version: this.GEM_VERSION,
+            },
+        };
+        console.log(config);
+    }
+    deleteThemeAsset(asset) {
+        const config = {
+            url: `${this.API_URL}/themes/${this.themeId}/assets`,
+            method: 'delete',
+            headers: this.headers,
+            params: {
+                key: `/${asset}`,
+                gem_version: this.GEM_VERSION,
+            },
+            data: {
+                key: `/${asset}`,
+            },
+        };
+        return axios_1.default
+            .request(config)
+            .then(() => ({ success: true }))
+            .catch((error) => ({
+            success: false,
+            message: error.response.data.message,
+        }));
     }
 }
 exports.TrayApi = TrayApi;
