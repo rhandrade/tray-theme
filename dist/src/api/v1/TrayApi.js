@@ -167,10 +167,18 @@ class TrayApi {
         return axios_1.default
             .request(config)
             .then(() => ({ success: true }))
-            .catch((error) => ({
-            success: false,
-            message: error.response.data.message,
-        }));
+            .catch((error) => {
+            if (error.response.data.message.includes("undefined method `id'")) {
+                return {
+                    success: true,
+                    message: 'False negative detected. Api returns error but theme was removed.',
+                };
+            }
+            return {
+                success: false,
+                message: error.response.data.message,
+            };
+        });
     }
     /**
      * Get theme assets

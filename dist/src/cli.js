@@ -71,7 +71,7 @@ commander_1.program
     });
     const resultCheckConfig = yield api.checkConfiguration();
     if (!resultCheckConfig.success) {
-        console.log(chalk_1.default `{red [Fail]} Api key, password or theme id not correctly. Please verify and tray again.`);
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Api key, password or theme id not correctly. Please verify and tray again.`);
         process.exit();
     }
     const resultSaveFile = yield utils_1.saveConfigFile({
@@ -81,10 +81,10 @@ commander_1.program
         previewUrl: resultCheckConfig.previewUrl,
     });
     if (!resultSaveFile.success) {
-        console.log(chalk_1.default `{red [Fail]} ${resultSaveFile.message}.`);
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultSaveFile.message}.`);
         process.exit();
     }
-    console.log(chalk_1.default `{green [Complete]} ${resultSaveFile.message}`);
+    console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} ${resultSaveFile.message}`);
 }));
 /**
  * List all themes available at store
@@ -93,127 +93,139 @@ commander_1.program
     .command('themes')
     .description('List all themes available at store')
     .action(() => __awaiter(void 0, void 0, void 0, function* () {
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Getting all available themes...`);
     const resultLoadFile = yield utils_1.loadConfigFile();
-    console.log(resultLoadFile);
-    // if (!resultLoadFile.success) {
-    //     console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
-    //     process.exit();
-    // }
-    // const { key, password,  } = resultLoadFile.config;
-    // const api = new TrayApi(config);
-    // const themesResult = await api.getThemes();
-    // if (!themesResult.success) {
-    //     console.log(chalk`{red [Fail]} ${themesResult.message}.`);
-    //     process.exit();
-    // }
-    // console.log(chalk`{green [Complete]} Themes available:`);
-    // console.table(themesResult.themes);
+    if (!resultLoadFile.success) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultLoadFile.message}.`);
+        log_update_1.default.done();
+        process.exit();
+    }
+    const { key, password } = resultLoadFile.config;
+    const api = new TrayApi_1.TrayApi({ key, password });
+    const themesResult = yield api.getThemes();
+    if (!themesResult.success) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${themesResult.message}.`);
+        log_update_1.default.done();
+        process.exit();
+    }
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} Themes available:`);
+    console.table(themesResult.themes);
 }));
-// /**
-//  * Create a new theme on store
-//  */
-// program
-//     .command('new')
-//     .arguments('<key> <password> <theme_name> [theme_base]')
-//     .description('Create a new theme in store', {
-//         key        : 'Api key',
-//         password   : 'Api password',
-//         theme_name : 'Name of the theme',
-//         theme_base : 'Base theme for this new theme - default: default'
-//     })
-//     .action(async (key, password, theme_name, theme_base) => {
-//         let api = new Api(key, password);
-//         let resultCheckConfig = await api.checkConfiguration();
-//         if(!resultCheckConfig.success){
-//             console.log(chalk`{red [Fail]} Api key or password not correctly. Please verify and tray again.`);
-//             process.exit();
-//         }
-//         log(chalk`{blue [Processing]} Creating theme {magenta ${theme_name}} on store...`);
-//         let resultCreationTheme = theme_base ? await api.createTheme(theme_name, theme_base) : await api.createTheme(theme_name);
-//         if(!resultCreationTheme.success){
-//             log(chalk`{red [Fail]} ${resultCreationTheme.message}.`);
-//             log.done();
-//             process.exit();
-//         }
-//         log(chalk`{green [Complete]} Theme ${theme_name} created on store.`);
-//         log.done();
-//         log(chalk`{blue [Processing]} Creating config file...`);
-//         let resultSaveFile = await utils.saveConfigFile(key, password, resultCreationTheme.themeId, resultCreationTheme.previewUrl);
-//         if(!resultSaveFile.success){
-//             log(chalk`{red [Fail]} ${resultSaveFile.message}.`);
-//             log.done();
-//             process.exit();
-//         }
-//         log(chalk`{green [Complete]} ${resultSaveFile.message}`);
-//         log.done();
-//     });
-// /**
-//  * Clean theme cache on store
-//  */
-// program
-//     .command('clean-cache [theme_id]')
-//     .description('Clean theme cache on store', {
-//         theme_id : 'Id of theme to clean cache - default: configured theme id'
-//     })
-//     .action(async (theme_id) => {
-//         let resultLoadFile = await utils.loadConfigFile();
-//         if(!resultLoadFile.success){
-//             console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
-//             process.exit();
-//         }
-//         let config = resultLoadFile.config;
-//         log(chalk`{blue [Processing]} Cleaning cache from configured theme id ${theme_id ? theme_id : config.themeId}...`);
-//         let api = new Api(config.key, config.password, config.themeId);
-//         let cleanCacheResult = theme_id ? await api.cleanCache(theme_id) : await api.cleanCache();
-//         if(!cleanCacheResult.success){
-//             log(chalk`{red [Fail]} Error from api: ${cleanCacheResult.message}.`);
-//             log.done();
-//             process.exit();
-//         }
-//         log(chalk`{green [Complete]} Cache from theme with id ${theme_id ? theme_id : config.themeId} cleaned.`);
-//         log.done();
-//     });
-// /**
-//  * Delete a theme from store
-//  */
-// program
-//     .command('delete-theme')
-//     .arguments('<theme_id>')
-//     .description('Delete a theme from store', {
-//         theme_id : 'Id of theme to remove'
-//     })
-//     .action(async (theme_id) => {
-//         let answer = await inquirer.prompt(
-//             {
-//                 type    : 'confirm',
-//                 message : 'Do you really want to delete this theme? This action cannot be undone.',
-//                 name    : 'confirmDelete',
-//                 default : false,
-//             }
-//         );
-//         if(!answer.confirmDelete){
-//             console.log(chalk`{red [Aborted]} Deletion of theme ${theme_id} was aborted by user.`);
-//             process.exit();
-//         }
-//         let resultLoadFile = await utils.loadConfigFile();
-//         if(!resultLoadFile.success){
-//             console.log(chalk`{red [Fail]} ${resultLoadFile.message}.`);
-//             process.exit();
-//         }
-//         log(chalk`{blue [Processing]} Deleting theme with id {magenta ${theme_id}} on store...`);
-//         let config = resultLoadFile.config;
-//         let api = new Api(config.key, config.password, config.themeId);
-//         let deleteResult = await api.deleteTheme(theme_id);
-//         if(!deleteResult.success){
-//             log(chalk`{red [Fail]} Error from api: ${deleteResult.message}.`);
-//             log.done();
-//             process.exit();
-//         }
-//         log(chalk`{green [Complete]} Theme with id ${theme_id} deleted.`);
-//         log.done();
-//     });
-// const fse = require('fs-extra');
-// const path = require('path');
+/**
+ * Create a new theme on store
+ */
+commander_1.program
+    .command('new')
+    .arguments('<key> <password> <theme_name> [theme_base]')
+    .description('Create a new theme in store', {
+    key: 'Api key',
+    password: 'Api password',
+    theme_name: 'Name of the theme',
+    theme_base: 'Base theme for this new theme - default: default',
+})
+    .action((key, password, theme_name, theme_base) => __awaiter(void 0, void 0, void 0, function* () {
+    const api = new TrayApi_1.TrayApi({ key, password });
+    const resultCheckConfig = yield api.checkConfiguration();
+    if (!resultCheckConfig.success) {
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Api key or password not correctly. Please verify and tray again.`);
+        process.exit();
+    }
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Creating theme {magenta ${theme_name}} on store...`);
+    const resultCreationTheme = theme_base
+        ? yield api.createTheme(theme_name, theme_base)
+        : yield api.createTheme(theme_name);
+    if (!resultCreationTheme.success) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultCreationTheme.message}.`);
+        log_update_1.default.done();
+        process.exit();
+    }
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} Theme ${theme_name} created on store.`);
+    log_update_1.default.done();
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Creating config file...`);
+    const { themeId, previewUrl } = resultCreationTheme;
+    const resultSaveFile = yield utils_1.saveConfigFile({
+        key,
+        password,
+        themeId,
+        previewUrl,
+    });
+    if (!resultSaveFile.success) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultSaveFile.message}.`);
+        log_update_1.default.done();
+        process.exit();
+    }
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} ${resultSaveFile.message}`);
+    log_update_1.default.done();
+}));
+/**
+ * Clean theme cache on store
+ */
+commander_1.program
+    .command('clean-cache [theme_id]')
+    .description('Clean theme cache on store', {
+    theme_id: 'Id of theme to clean cache - default: configured theme id',
+})
+    .action((theme_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const resultLoadFile = yield utils_1.loadConfigFile();
+    if (!resultLoadFile.success) {
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultLoadFile.message}.`);
+        process.exit();
+    }
+    const { key, password, themeId } = resultLoadFile.config;
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Cleaning cache from configured theme id ${theme_id || themeId}...`);
+    const api = new TrayApi_1.TrayApi({ key, password, themeId });
+    const cleanCacheResult = theme_id ? yield api.cleanCache(theme_id) : yield api.cleanCache();
+    if (!cleanCacheResult.success) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Error from api: ${cleanCacheResult.message}.`);
+        log_update_1.default.done();
+        process.exit();
+    }
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} Cache from theme with id ${theme_id || themeId} cleaned.`);
+    log_update_1.default.done();
+}));
+/**
+ * Delete a theme from store
+ */
+commander_1.program
+    .command('delete-theme')
+    .arguments('<theme_id>')
+    .description('Delete a theme from store', {
+    theme_id: 'Id of theme to remove',
+})
+    .action((theme_id) => __awaiter(void 0, void 0, void 0, function* () {
+    const question = yield inquirer_1.default.prompt({
+        type: 'confirm',
+        message: 'Do you really want to delete this theme? This action cannot be undone.',
+        name: 'confirmDelete',
+        default: false,
+    });
+    if (!question.confirmDelete) {
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Aborted]} Deletion of theme ${theme_id} was aborted by user.`);
+        process.exit();
+    }
+    const resultLoadFile = yield utils_1.loadConfigFile();
+    if (!resultLoadFile.success) {
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultLoadFile.message}.`);
+        process.exit();
+    }
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Deleting theme with id {magenta ${theme_id}} on store...`);
+    const { key, password, themeId } = resultLoadFile.config;
+    const api = new TrayApi_1.TrayApi({ key, password, themeId });
+    const deleteResult = yield api.deleteTheme(theme_id);
+    if (!deleteResult.success) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Error from api: ${deleteResult.message}.`);
+        log_update_1.default.done();
+        process.exit();
+    }
+    if (deleteResult.message) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} Theme with id ${theme_id} deleted with message: ${deleteResult.message}.`);
+    }
+    else {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} Theme with id ${theme_id} deleted.`);
+    }
+    log_update_1.default.done();
+}));
+//
 commander_1.program
     .command('delete-file')
     .alias('rm')
