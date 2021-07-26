@@ -4,6 +4,7 @@ import { program } from 'commander';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import log from 'log-update';
+import { readFile } from 'fs/promises';
 // import chokidar from 'chokidar';
 
 import packageConfig from '../package.json';
@@ -336,6 +337,42 @@ program
             }
 
             log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} File '${file}' downloaded.`);
+            log.done();
+        });
+    });
+
+program
+    .command('upload')
+    .arguments('<files...>')
+    .action(async (files: string[]) => {
+        console.log(files);
+
+        const resultLoadFile: any = await loadConfigFile();
+
+        if (!resultLoadFile.success) {
+            console.log(chalk`[${getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+            process.exit();
+        }
+
+        const { key, password, themeId } = resultLoadFile.config;
+
+        const api = new TrayApi({ key, password, themeId });
+
+        files.forEach(async (file: string) => {
+            log(chalk`[${getCurrentLocalteTime()}] {blue Processing} Uploading file '${file}'...`);
+            const fileContent = await readFile(file);
+
+            const sendFileResult: any = await api.sendThemeAsset(file, fileContent);
+
+            if (!sendFileResult.success) {
+                log(
+                    chalk`[${getCurrentLocalteTime()}] {red Fail} Error when uploading file '${file}'. Error: ${
+                        sendFileResult.message
+                    }.`
+                );
+            }
+
+            log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} File '${file}' uploaded.`);
             log.done();
         });
     });

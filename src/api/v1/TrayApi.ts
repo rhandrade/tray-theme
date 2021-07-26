@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import FileType from 'file-type';
+import { isBinaryFile } from 'isbinaryfile';
 
 interface ITrayApi {
     key: string;
@@ -257,17 +258,30 @@ class TrayApi {
             }));
     }
 
-    sendThemeAsset() {
+    async sendThemeAsset(asset: string, data: Buffer) {
         const config: AxiosRequestConfig = {
             url: `${this.API_URL}/themes/${this.themeId}/assets`,
-            method: 'get',
+            method: 'put',
             headers: this.headers,
-            params: {
+            data: {
                 gem_version: this.GEM_VERSION,
+                key: `/${asset}`,
             },
         };
 
-        console.log(config);
+        if (await isBinaryFile(asset)) {
+            config.data.attachment = data.toString('base64');
+        } else {
+            config.data.value = data.toString('base64');
+        }
+
+        return axios
+            .request(config)
+            .then(() => ({ success: true }))
+            .catch((error) => ({
+                success: false,
+                message: error.response.data.message,
+            }));
     }
 
     deleteThemeAsset(asset: string) {
