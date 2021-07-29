@@ -13,14 +13,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const fs_1 = require("fs");
 const commander_1 = require("commander");
+const isbinaryfile_1 = require("isbinaryfile");
 const chalk_1 = __importDefault(require("chalk"));
 const inquirer_1 = __importDefault(require("inquirer"));
 const log_update_1 = __importDefault(require("log-update"));
 const glob_1 = __importDefault(require("glob"));
-const isbinaryfile_1 = require("isbinaryfile");
 // import chokidar from 'chokidar';
-const fs_1 = require("fs");
 const package_json_1 = __importDefault(require("../package.json"));
 const TrayApi_1 = require("./api/v1/TrayApi");
 const utils_1 = require("./libs/utils");
@@ -235,20 +235,20 @@ commander_1.program
     let assets = files;
     const resultLoadFile = yield utils_1.loadConfigFile();
     if (!resultLoadFile.success) {
-        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultLoadFile.message}.`);
         process.exit();
     }
     const { key, password, themeId } = resultLoadFile.config;
     const api = new TrayApi_1.TrayApi({ key, password, themeId });
     if (!assets.length) {
-        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue Processing} Listing files that need to be downloaded...`);
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] Listing files that need to be downloaded...`);
         const themeAssetsResults = yield api.getThemeAssets();
         if (!themeAssetsResults.success) {
-            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} Error from api': ${themeAssetsResults.message}.`);
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Error from api': ${themeAssetsResults.message}.`);
             process.exit();
         }
         assets = themeAssetsResults.assets.map(({ path }) => path);
-        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green Complete} List retrived.`);
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] List retrived.`);
         log_update_1.default.done();
         log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] Downloading ${themeAssetsResults.quantity} files...`);
         log_update_1.default.done();
@@ -257,17 +257,19 @@ commander_1.program
         log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] Downloading ${assets.length} files...`);
         log_update_1.default.done();
     }
-    assets.forEach((file) => __awaiter(void 0, void 0, void 0, function* () {
-        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue Processing} Downloading file '${file}'...`);
+    for (const file of assets) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Downloading file '${file}'...`);
+        // eslint-disable-next-line no-await-in-loop
         const response = yield api.getThemeAsset(file.startsWith('/') ? file : `/${file}`);
         const { path, content } = response.asset;
+        // eslint-disable-next-line no-await-in-loop
         const saveFileResult = yield utils_1.saveAssetFile(path, content);
         if (!saveFileResult.success) {
-            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} Error when saving file '${file}'. Error: ${saveFileResult.message}.`);
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Error when saving file '${file}'. Error: ${saveFileResult.message}.`);
         }
         log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} File '${file}' downloaded.`);
         log_update_1.default.done();
-    }));
+    }
 }));
 commander_1.program
     .command('upload')

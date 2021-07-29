@@ -1,15 +1,15 @@
 #! /usr/bin/env node
 
+import { readFileSync } from 'fs';
 import { program } from 'commander';
-import { readFile } from 'fs/promises';
+import { isBinaryFileSync } from 'isbinaryfile';
+
 import chalk from 'chalk';
 import inquirer from 'inquirer';
 import log from 'log-update';
 import glob from 'glob';
-import { isBinaryFileSync } from 'isbinaryfile';
 // import chokidar from 'chokidar';
 
-import { readFileSync } from 'fs';
 import packageConfig from '../package.json';
 import { TrayApi } from './api/v1/TrayApi';
 
@@ -343,7 +343,7 @@ program
 
         if (!resultLoadFile.success) {
 
-            console.log(chalk`[${getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+            console.log(chalk`[${getCurrentLocalteTime()}] {red [Fail]} ${resultLoadFile.message}.`);
             process.exit();
 
         }
@@ -354,19 +354,19 @@ program
 
         if (!assets.length) {
 
-            log(chalk`[${getCurrentLocalteTime()}] {blue Processing} Listing files that need to be downloaded...`);
+            log(chalk`[${getCurrentLocalteTime()}] Listing files that need to be downloaded...`);
 
             const themeAssetsResults: any = await api.getThemeAssets();
 
             if (!themeAssetsResults.success) {
 
-                log(chalk`[${getCurrentLocalteTime()}] {red Fail} Error from api': ${themeAssetsResults.message}.`);
+                log(chalk`[${getCurrentLocalteTime()}] {red [Fail]} Error from api': ${themeAssetsResults.message}.`);
                 process.exit();
 
             }
             assets = themeAssetsResults.assets.map(({ path }) => path);
 
-            log(chalk`[${getCurrentLocalteTime()}] {green Complete} List retrived.`);
+            log(chalk`[${getCurrentLocalteTime()}] List retrived.`);
             log.done();
 
             log(chalk`[${getCurrentLocalteTime()}] Downloading ${themeAssetsResults.quantity} files...`);
@@ -379,20 +379,22 @@ program
 
         }
 
-        assets.forEach(async (file: string) => {
+        for (const file of assets) {
 
-            log(chalk`[${getCurrentLocalteTime()}] {blue Processing} Downloading file '${file}'...`);
+            log(chalk`[${getCurrentLocalteTime()}] {blue [Processing]} Downloading file '${file}'...`);
 
+            // eslint-disable-next-line no-await-in-loop
             const response: any = await api.getThemeAsset(file.startsWith('/') ? file : `/${file}`);
 
             const { path, content } = response.asset;
 
+            // eslint-disable-next-line no-await-in-loop
             const saveFileResult: any = await saveAssetFile(path, content);
 
             if (!saveFileResult.success) {
 
                 log(
-                    chalk`[${getCurrentLocalteTime()}] {red Fail} Error when saving file '${file}'. Error: ${
+                    chalk`[${getCurrentLocalteTime()}] {red [Fail]} Error when saving file '${file}'. Error: ${
                         saveFileResult.message
                     }.`,
                 );
@@ -402,7 +404,7 @@ program
             log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} File '${file}' downloaded.`);
             log.done();
 
-        });
+        }
 
     });
 
