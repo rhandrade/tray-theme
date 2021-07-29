@@ -8,6 +8,7 @@ import chalk from 'chalk';
 import inquirer from 'inquirer';
 import log from 'log-update';
 import glob from 'glob';
+import open from 'open';
 // import chokidar from 'chokidar';
 
 import packageConfig from '../package.json';
@@ -519,6 +520,30 @@ program
             log.done();
 
         });
+
+    });
+
+program
+    .command('open')
+    .action(async () => {
+
+        const resultLoadFile: any = await loadConfigFile();
+
+        if (!resultLoadFile.success) {
+
+            console.log(chalk`[${getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+            process.exit();
+
+        }
+
+        const { previewUrl } = resultLoadFile.config;
+
+        log(chalk`[${getCurrentLocalteTime()}] {blue [Processing]} Opening theme preview page...`);
+
+        await open(previewUrl, { wait: true });
+
+        log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} Theme preview page opened in default browser.`);
+        log.done();
 
     });
 

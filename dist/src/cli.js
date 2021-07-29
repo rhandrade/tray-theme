@@ -20,6 +20,7 @@ const chalk_1 = __importDefault(require("chalk"));
 const inquirer_1 = __importDefault(require("inquirer"));
 const log_update_1 = __importDefault(require("log-update"));
 const glob_1 = __importDefault(require("glob"));
+const open_1 = __importDefault(require("open"));
 // import chokidar from 'chokidar';
 const package_json_1 = __importDefault(require("../package.json"));
 const TrayApi_1 = require("./api/v1/TrayApi");
@@ -333,6 +334,20 @@ commander_1.program
         }
         log_update_1.default.done();
     }));
+}));
+commander_1.program
+    .command('open')
+    .action(() => __awaiter(void 0, void 0, void 0, function* () {
+    const resultLoadFile = yield utils_1.loadConfigFile();
+    if (!resultLoadFile.success) {
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+        process.exit();
+    }
+    const { previewUrl } = resultLoadFile.config;
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Opening theme preview page...`);
+    yield open_1.default(previewUrl, { wait: true });
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} Theme preview page opened in default browser.`);
+    log_update_1.default.done();
 }));
 commander_1.program.version(package_json_1.default.version).name('tray');
 commander_1.program.parse(process.argv);
