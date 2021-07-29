@@ -17,8 +17,10 @@ const commander_1 = require("commander");
 const chalk_1 = __importDefault(require("chalk"));
 const inquirer_1 = __importDefault(require("inquirer"));
 const log_update_1 = __importDefault(require("log-update"));
-const promises_1 = require("fs/promises");
+const glob_1 = __importDefault(require("glob"));
+const isbinaryfile_1 = require("isbinaryfile");
 // import chokidar from 'chokidar';
+const fs_1 = require("fs");
 const package_json_1 = __importDefault(require("../package.json"));
 const TrayApi_1 = require("./api/v1/TrayApi");
 const utils_1 = require("./libs/utils");
@@ -269,26 +271,42 @@ commander_1.program
 }));
 commander_1.program
     .command('upload')
-    .arguments('<files...>')
+    .arguments('[files...]')
     .action((files) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(files);
+    let assets = files;
+    if (!assets.length) {
+        assets = glob_1.default.sync('**/*.*');
+        assets = assets.filter((item) => item !== 'config.yml');
+    }
+    console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] Uploading ${assets.length} files...`);
     const resultLoadFile = yield utils_1.loadConfigFile();
     if (!resultLoadFile.success) {
-        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} ${resultLoadFile.message}.`);
+        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultLoadFile.message}.`);
         process.exit();
     }
     const { key, password, themeId } = resultLoadFile.config;
     const api = new TrayApi_1.TrayApi({ key, password, themeId });
-    files.forEach((file) => __awaiter(void 0, void 0, void 0, function* () {
-        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue Processing} Uploading file '${file}'...`);
-        const fileContent = yield promises_1.readFile(file);
-        const sendFileResult = yield api.sendThemeAsset(file, fileContent);
+    let successAssets = 0;
+    let errorAssets = 0;
+    for (const asset of assets) {
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {blue [Processing]} Uploading file '${asset}'... `);
+        const assetStartingWithSlash = asset.startsWith('/') ? asset : `/${asset}`;
+        const fileContent = fs_1.readFileSync(`.${assetStartingWithSlash}`);
+        const isBinary = isbinaryfile_1.isBinaryFileSync(`.${assetStartingWithSlash}`);
+        // eslint-disable-next-line no-await-in-loop
+        const sendFileResult = yield api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
         if (!sendFileResult.success) {
-            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red Fail} Error when uploading file '${file}'. Error: ${sendFileResult.message}.`);
+            errorAssets++;
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Error when uploading file '${asset}'. Error: ${sendFileResult.message}.`);
+            log_update_1.default.done();
         }
-        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} File '${file}' uploaded.`);
-        log_update_1.default.done();
-    }));
+        else {
+            successAssets++;
+            log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} File '${asset}' uploaded.`);
+            log_update_1.default.done();
+        }
+    }
+    console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] Upload process finished. | Sent ${successAssets} files with success. | ${errorAssets} files could not be sent.`);
 }));
 commander_1.program
     .command('delete-file')

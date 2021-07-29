@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TrayApi = void 0;
 const axios_1 = __importDefault(require("axios"));
 const file_type_1 = __importDefault(require("file-type"));
-const isbinaryfile_1 = require("isbinaryfile");
 class TrayApi {
     /**
      * Initiate new TrayApi class
@@ -247,7 +246,7 @@ class TrayApi {
             });
         });
     }
-    sendThemeAsset(asset, data) {
+    sendThemeAsset(asset, data, isBinary = false) {
         return __awaiter(this, void 0, void 0, function* () {
             const config = {
                 url: `${this.API_URL}/themes/${this.themeId}/assets`,
@@ -255,21 +254,17 @@ class TrayApi {
                 headers: this.headers,
                 data: {
                     gem_version: this.GEM_VERSION,
-                    key: `/${asset}`,
+                    key: asset,
                 },
             };
-            if (yield isbinaryfile_1.isBinaryFile(asset)) {
-                config.data.attachment = data.toString('base64');
-            }
-            else {
-                config.data.value = data.toString('base64');
-            }
-            return axios_1.default
-                .request(config)
-                .then(() => ({ success: true }))
+            config.data[(isBinary ? 'attachment' : 'value')] = data.toString('base64');
+            return axios_1.default.request(config)
+                .then(() => ({
+                success: true,
+            }))
                 .catch((error) => ({
                 success: false,
-                message: error.response.data.message,
+                message: (error.response.status < 500 ? error.response.data.message : 'Api return status 500 - Internal server error'),
             }));
         });
     }
