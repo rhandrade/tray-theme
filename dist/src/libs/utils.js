@@ -17,7 +17,7 @@ const fs_1 = require("fs");
 const promises_1 = require("fs/promises");
 const js_yaml_1 = __importDefault(require("js-yaml"));
 const path_1 = require("path");
-function saveConfigFile({ key, password, themeId, previewUrl }) {
+function saveConfigFile({ key, password, themeId, previewUrl, }) {
     const fileDataAsObject = {
         ':api_key': key,
         ':password': password,
@@ -43,7 +43,7 @@ function loadConfigFile() {
         return promises_1.readFile('config.yml', { encoding: 'utf8' })
             .then((data) => {
             const config = js_yaml_1.default.load(data);
-            const { ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl } = config;
+            const { ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl, } = config;
             return {
                 success: true,
                 config: {

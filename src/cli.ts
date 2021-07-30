@@ -9,7 +9,8 @@ import inquirer from 'inquirer';
 import log from 'log-update';
 import glob from 'glob';
 import open from 'open';
-// import chokidar from 'chokidar';
+import chokidar from 'chokidar';
+import slash from 'slash';
 
 import packageConfig from '../package.json';
 import { TrayApi } from './api/v1/TrayApi';
@@ -520,6 +521,145 @@ program
             log.done();
 
         });
+
+    });
+
+program
+    .command('watch')
+    .action(async () => {
+
+        const resultLoadFile: any = await loadConfigFile();
+
+        if (!resultLoadFile.success) {
+
+            console.log(chalk`[${getCurrentLocalteTime()}] {red [Fail]} ${resultLoadFile.message}.`);
+            process.exit();
+
+        }
+
+        const { key, password, themeId } = resultLoadFile.config;
+
+        const api = new TrayApi({ key, password, themeId });
+
+        const watcher = chokidar.watch('./', {
+            ignored: /(^|[/\\])\../, // ignore dotfiles
+            persistent: true,
+            ignoreInitial: true,
+        });
+
+        watcher
+            .on('ready', () => {
+
+                console.log(chalk`[${getCurrentLocalteTime()}] Watching files...`);
+
+            })
+
+            .on('add', async (path) => {
+
+                const asset = slash(path);
+
+                const assetStartingWithSlash = asset.startsWith('/') ? asset : `/${asset}`;
+
+                const fileContent = readFileSync(`.${assetStartingWithSlash}`);
+                const isBinary = isBinaryFileSync(`.${assetStartingWithSlash}`);
+
+                log(chalk`[${getCurrentLocalteTime()}] {blue [Processing]} Uploading file '${asset}'...`);
+
+                const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
+
+                if (!sendFileResult.success) {
+
+                    log(
+                        chalk`[${getCurrentLocalteTime()}] {red [Fail]} Error when uploading file '${asset}'. Error: ${
+                            sendFileResult.message
+                        }.`,
+                    );
+                    log.done();
+
+                } else {
+
+                    log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} File '${asset}' uploaded.`);
+                    log.done();
+
+                }
+
+            })
+
+            .on('change', async (path) => {
+
+                const asset = slash(path);
+
+                const assetStartingWithSlash = asset.startsWith('/') ? asset : `/${asset}`;
+
+                const fileContent = readFileSync(`.${assetStartingWithSlash}`);
+                const isBinary = isBinaryFileSync(`.${assetStartingWithSlash}`);
+
+                log(chalk`[${getCurrentLocalteTime()}] {blue [Processing]} Uploading file '${asset}'...`);
+
+                const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
+
+                if (!sendFileResult.success) {
+
+                    log(
+                        chalk`[${getCurrentLocalteTime()}] {red [Fail]} Error when uploading file '${asset}'. Error: ${
+                            sendFileResult.message
+                        }.`,
+                    );
+                    log.done();
+
+                } else {
+
+                    log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} File '${asset}' uploaded.`);
+                    log.done();
+
+                }
+
+            })
+
+            .on('unlink', async (path) => {
+
+                const asset = slash(path);
+
+                const assetStartingWithSlash = asset.startsWith('/') ? asset : `/${asset}`;
+
+                log(chalk`[${getCurrentLocalteTime()}] {blue Processing} Deleting file '${asset}'...`);
+
+                const response: any = await api.deleteThemeAsset(assetStartingWithSlash);
+
+                if (!response.success) {
+
+                    log(
+                        chalk`[${getCurrentLocalteTime()}] {red Fail} Error from api when deleting file '${assetStartingWithSlash}': ${
+                            response.message
+                        }.`,
+                    );
+
+                } else {
+
+                    log(chalk`[${getCurrentLocalteTime()}] {green Complete} File '${assetStartingWithSlash}' deleted.`);
+
+                }
+
+                log.done();
+
+            })
+
+            .on('addDir', () => {
+
+                console.log(chalk`[${getCurrentLocalteTime()}] {yellow [Warn]} Creating empty directory is not supported by Tray API. Ignoring....`);
+
+            })
+
+            .on('unlinkDir', () => {
+
+                console.log(chalk`[${getCurrentLocalteTime()}] {yellow [Warn]} Deleting directory is not supported by Tray CLI API. Please delete using admin panel. Ignoring....`);
+
+            })
+            .on('error', (error) => {
+
+                console.log(`Watcher error: ${error}`);
+
+            });
 
     });
 

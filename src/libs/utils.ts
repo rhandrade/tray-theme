@@ -17,7 +17,10 @@ interface IConfigFileLoaded {
     ':preview_url': string;
 }
 
-export function saveConfigFile({ key, password, themeId, previewUrl }: IConfigFile) {
+export function saveConfigFile({
+    key, password, themeId, previewUrl,
+}: IConfigFile) {
+
     const fileDataAsObject: IConfigFileLoaded = {
         ':api_key': key,
         ':password': password,
@@ -38,14 +41,19 @@ export function saveConfigFile({ key, password, themeId, previewUrl }: IConfigFi
             success: false,
             message: `Unable to create config file. ${error}`,
         }));
+
 }
 
 export async function loadConfigFile() {
+
     return readFile('config.yml', { encoding: 'utf8' })
         .then((data) => {
+
             const config = yaml.load(data) as IConfigFileLoaded;
 
-            const { ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl } = config;
+            const {
+                ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl,
+            } = config;
 
             return {
                 success: true,
@@ -56,22 +64,29 @@ export async function loadConfigFile() {
                     previewUrl,
                 },
             };
+
         })
         .catch((error) => ({
             success: false,
             message: `Unable to load config file. ${error}`,
         }));
+
 }
 
 export function getCurrentLocalteTime() {
+
     return new Date().toLocaleTimeString();
+
 }
 
 export async function saveAssetFile(path: string, data: Buffer) {
+
     const fileDirname = dirname(path);
 
     if (!existsSync(fileDirname)) {
+
         mkdirSync(fileDirname, { recursive: true });
+
     }
 
     return writeFile(path, data)
@@ -80,4 +95,5 @@ export async function saveAssetFile(path: string, data: Buffer) {
             success: false,
             message: `Unable to create '${path}' file. ${error}`,
         }));
+
 }
