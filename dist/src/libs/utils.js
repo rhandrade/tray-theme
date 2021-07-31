@@ -15,7 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.saveAssetFile = exports.getCurrentLocalteTime = exports.loadConfigFile = exports.saveConfigFile = void 0;
 const fs_1 = require("fs");
 const promises_1 = require("fs/promises");
-const js_yaml_1 = __importDefault(require("js-yaml"));
+// import yaml from 'js-yaml';
+const yaml_1 = __importDefault(require("yaml"));
 const path_1 = require("path");
 function saveConfigFile({ key, password, themeId, previewUrl, }) {
     const fileDataAsObject = {
@@ -24,9 +25,7 @@ function saveConfigFile({ key, password, themeId, previewUrl, }) {
         ':theme_id': themeId,
         ':preview_url': previewUrl,
     };
-    const configFileData = js_yaml_1.default.dump(fileDataAsObject, {
-        forceQuotes: true,
-    });
+    const configFileData = yaml_1.default.stringify(fileDataAsObject);
     return promises_1.writeFile('config.yml', configFileData)
         .then(() => ({
         success: true,
@@ -42,7 +41,7 @@ function loadConfigFile() {
     return __awaiter(this, void 0, void 0, function* () {
         return promises_1.readFile('config.yml', { encoding: 'utf8' })
             .then((data) => {
-            const config = js_yaml_1.default.load(data);
+            const config = yaml_1.default.parse(data);
             const { ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl, } = config;
             return {
                 success: true,

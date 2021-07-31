@@ -74,11 +74,16 @@ commander_1.program
         password: answers.password,
         themeId: answers.themeId,
     });
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Processing]} Verifying data...`);
     const resultCheckConfig = yield api.checkConfiguration();
     if (!resultCheckConfig.success) {
         log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} Api key, password or theme id not correctly. Please verify and tray again.`);
+        log_update_1.default.done();
         process.exit();
     }
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} Data verified with success.`);
+    log_update_1.default.done();
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Processing]} Creating config.yml file...`);
     const resultSaveFile = yield utils_1.saveConfigFile({
         key: answers.key,
         password: answers.password,
@@ -86,10 +91,12 @@ commander_1.program
         previewUrl: resultCheckConfig.previewUrl,
     });
     if (!resultSaveFile.success) {
-        console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultSaveFile.message}.`);
+        log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {red [Fail]} ${resultSaveFile.message}.`);
+        log_update_1.default.done();
         process.exit();
     }
-    console.log(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} ${resultSaveFile.message}`);
+    log_update_1.default(chalk_1.default `[${utils_1.getCurrentLocalteTime()}] {green [Complete]} ${resultSaveFile.message}`);
+    log_update_1.default.done();
 }));
 /**
  * List all themes available at store

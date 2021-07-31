@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
-import yaml from 'js-yaml';
+// import yaml from 'js-yaml';
+import yaml from 'yaml';
 import { dirname } from 'path';
 
 interface IConfigFile {
@@ -28,9 +29,7 @@ export function saveConfigFile({
         ':preview_url': previewUrl,
     };
 
-    const configFileData = yaml.dump(fileDataAsObject, {
-        forceQuotes: true,
-    });
+    const configFileData = yaml.stringify(fileDataAsObject);
 
     return writeFile('config.yml', configFileData)
         .then(() => ({
@@ -49,7 +48,7 @@ export async function loadConfigFile() {
     return readFile('config.yml', { encoding: 'utf8' })
         .then((data) => {
 
-            const config = yaml.load(data) as IConfigFileLoaded;
+            const config = yaml.parse(data) as IConfigFileLoaded;
 
             const {
                 ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl,

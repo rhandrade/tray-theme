@@ -82,6 +82,8 @@ program
             themeId: answers.themeId,
         });
 
+        log(chalk`[${getCurrentLocalteTime()}] {green [Processing]} Verifying data...`);
+
         const resultCheckConfig: any = await api.checkConfiguration();
 
         if (!resultCheckConfig.success) {
@@ -89,9 +91,15 @@ program
             log(
                 chalk`[${getCurrentLocalteTime()}] {red [Fail]} Api key, password or theme id not correctly. Please verify and tray again.`,
             );
+            log.done();
             process.exit();
 
         }
+
+        log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} Data verified with success.`);
+        log.done();
+
+        log(chalk`[${getCurrentLocalteTime()}] {green [Processing]} Creating config.yml file...`);
 
         const resultSaveFile = await saveConfigFile({
             key: answers.key,
@@ -102,12 +110,14 @@ program
 
         if (!resultSaveFile.success) {
 
-            console.log(chalk`[${getCurrentLocalteTime()}] {red [Fail]} ${resultSaveFile.message}.`);
+            log(chalk`[${getCurrentLocalteTime()}] {red [Fail]} ${resultSaveFile.message}.`);
+            log.done();
             process.exit();
 
         }
 
-        console.log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} ${resultSaveFile.message}`);
+        log(chalk`[${getCurrentLocalteTime()}] {green [Complete]} ${resultSaveFile.message}`);
+        log.done();
 
     });
 

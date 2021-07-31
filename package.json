@@ -31,10 +31,10 @@
         "glob": "^7.1.7",
         "inquirer": "^8.0.0",
         "isbinaryfile": "^4.0.8",
-        "js-yaml": "^4.0.0",
         "log-update": "^4.0.0",
         "open": "^8.2.1",
-        "slash": "^3.0.0"
+        "slash": "^3.0.0",
+        "yaml": "2.0.0-7"
     },
     "devDependencies": {
         "@types/glob": "^7.1.4",
