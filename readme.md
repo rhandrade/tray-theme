@@ -4,6 +4,18 @@ Interface de linha de comando desenvolvida em Node.js e TypeScript para ajudar d
 > **Atenção**
 > Esse programa está em fase de desenvolvimento e portanto não garantimos o correto funcionamento. Ajude-nos reportando problemas ao utilizá-lo.
 
+## Instalação
+Para usar esse programa basta instalar com os comandos abaixo. Recomendados fazer a instalação global.
+```sh
+# Instala globalmente no sistema (Recomendado)
+npm install tray-theme --global
+
+# Instala na pasta local
+npm install tray-theme
+```
+
+Se desejar não fazer a instalação global, todos os comando abaixo precisaram ter acrescido `npx` antes para que ele seja executado da instalação local.
+
 
 ## Etapas do projeto
 Esse projeto será divido em várias etapas. Você pode conferir a progresso pelos itens abaixo:
