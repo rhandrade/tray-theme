@@ -12,12 +12,13 @@ import open from 'open';
 import chokidar from 'chokidar';
 import slash from 'slash';
 
-import packageConfig from '../package.json';
 import { TrayApi } from './api/v1/TrayApi';
 
 import {
     saveConfigFile, loadConfigFile, getCurrentLocalteTime, saveAssetFile,
 } from './libs/utils';
+
+const CLI_VERSION = '1.0.0-alpha';
 
 /**
  * Create configure file
@@ -376,7 +377,8 @@ program
                 process.exit();
 
             }
-            assets = themeAssetsResults.assets.map(({ path }) => path);
+
+            assets = themeAssetsResults.assets.map(({ path }:any) => path);
 
             log(chalk`[${getCurrentLocalteTime()}] List retrived.`);
             log.done();
@@ -697,6 +699,5 @@ program
 
     });
 
-program.version(packageConfig.version).name('tray');
-
+program.version(CLI_VERSION).name('tray');
 program.parse(process.argv);

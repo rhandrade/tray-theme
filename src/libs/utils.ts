@@ -1,8 +1,7 @@
 import { existsSync, mkdirSync } from 'fs';
 import { readFile, writeFile } from 'fs/promises';
-// import yaml from 'js-yaml';
-import yaml from 'yaml';
 import { dirname } from 'path';
+import yaml from 'yaml';
 
 interface IConfigFile {
     key: string;
