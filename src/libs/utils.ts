@@ -1,7 +1,10 @@
-import { existsSync, mkdirSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
-import { dirname } from 'path';
-import yaml from 'yaml';
+import { existsSync, mkdirSync } from "fs";
+import { readFile, writeFile } from "fs/promises";
+import { dirname } from "path";
+
+import yaml from "yaml";
+import chalk from "chalk";
+import log from "log-update";
 
 interface IConfigFile {
     key: string;
@@ -11,47 +14,39 @@ interface IConfigFile {
 }
 
 interface IConfigFileLoaded {
-    ':api_key': string;
-    ':password': string;
-    ':theme_id': number;
-    ':preview_url': string;
+    ":api_key": string;
+    ":password": string;
+    ":theme_id": number;
+    ":preview_url": string;
 }
 
-export function saveConfigFile({
-    key, password, themeId, previewUrl,
-}: IConfigFile) {
-
+export function saveConfigFile({ key, password, themeId, previewUrl }: IConfigFile) {
     const fileDataAsObject: IConfigFileLoaded = {
-        ':api_key': key,
-        ':password': password,
-        ':theme_id': themeId,
-        ':preview_url': previewUrl,
+        ":api_key": key,
+        ":password": password,
+        ":theme_id": themeId,
+        ":preview_url": previewUrl,
     };
 
     const configFileData = yaml.stringify(fileDataAsObject);
 
-    return writeFile('config.yml', configFileData)
+    return writeFile("config.yml", configFileData)
         .then(() => ({
             success: true,
-            message: 'Configuration file created with success.',
+            message: "Configuration file created with success.",
         }))
         .catch((error) => ({
             success: false,
             message: `Unable to create config file. ${error}`,
         }));
-
 }
 
 export async function loadConfigFile() {
-
-    return readFile('config.yml', { encoding: 'utf8' })
+    return readFile("config.yml", { encoding: "utf8" })
         .then((data) => {
-
             const config = yaml.parse(data) as IConfigFileLoaded;
 
-            const {
-                ':api_key': key, ':password': password, ':theme_id': themeId, ':preview_url': previewUrl,
-            } = config;
+            const { ":api_key": key, ":password": password, ":theme_id": themeId, ":preview_url": previewUrl } = config;
 
             return {
                 success: true,
@@ -62,29 +57,22 @@ export async function loadConfigFile() {
                     previewUrl,
                 },
             };
-
         })
         .catch((error) => ({
             success: false,
             message: `Unable to load config file. ${error}`,
         }));
-
 }
 
 export function getCurrentLocalteTime() {
-
     return new Date().toLocaleTimeString();
-
 }
 
 export async function saveAssetFile(path: string, data: Buffer) {
-
     const fileDirname = dirname(path);
 
     if (!existsSync(fileDirname)) {
-
         mkdirSync(fileDirname, { recursive: true });
-
     }
 
     return writeFile(path, data)
@@ -93,5 +81,49 @@ export async function saveAssetFile(path: string, data: Buffer) {
             success: false,
             message: `Unable to create '${path}' file. ${error}`,
         }));
+}
 
+type LogMessageType = "info" | "pending" | "success" | "warning" | "error";
+
+export function logMessage(type: LogMessageType, message: string, done: boolean = false) {
+    let color;
+    let label;
+
+    switch (type) {
+        case "pending":
+            color = "blue";
+            label = "Processing";
+
+            break;
+        case "success":
+            color = "green";
+            label = "Complete";
+
+            break;
+        case "warning":
+            color = "yellow";
+            label = "Warn";
+
+            break;
+        case "error":
+            color = "red";
+            label = "Fail";
+
+            break;
+        default:
+            color = "";
+            label = "";
+
+            break;
+    }
+
+    if (color) {
+        log(chalk`[${getCurrentLocalteTime()}] {${color} [${label}]} ${message}`);
+    } else {
+        log(chalk`[${getCurrentLocalteTime()}] ${message}`);
+    }
+
+    if (done) {
+        log.done();
+    }
 }
