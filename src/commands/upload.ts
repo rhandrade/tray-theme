@@ -1,10 +1,11 @@
 import chalk from 'chalk';
 import glob from 'glob';
+import slash from 'slash';
 import { readFileSync } from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
 import { program } from 'commander';
 import { TrayApi } from '../api/v1/TrayApi';
-import { loadConfigFile, logMessage } from '../libs/utils';
+import { loadConfigFile, logMessage, checkFileUploadPermission, prepareToUpload } from '../libs/utils';
 
 /**
  * Upload one or more files for theme
@@ -36,27 +37,38 @@ export function upload() {
             let successAssets = 0;
             let errorAssets = 0;
 
-            for (const asset of assets) {
-                logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
+            for (const path of assets) {
+                const asset = slash(path);
 
-                const assetStartingWithSlash = asset.startsWith('/') ? asset : `/${asset}`;
+                const isAllowed = checkFileUploadPermission(asset);
 
-                const fileContent = readFileSync(`.${assetStartingWithSlash}`);
-                const isBinary = isBinaryFileSync(`.${assetStartingWithSlash}`);
+                if ( isAllowed ) {
+                    logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
 
-                // eslint-disable-next-line no-await-in-loop
-                const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
-
-                if (!sendFileResult.success) {
+                    const {
+                        assetStartingWithSlash,
+                        fileContent,
+                        isBinary
+                    } = prepareToUpload(asset);
+                    
+                    // eslint-disable-next-line no-await-in-loop
+                    const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
+                    
+                    if (!sendFileResult.success) {
+                        errorAssets++;
+                        logMessage(
+                            'error',
+                            `Error when uploading file ${chalk.magenta(asset)}. Error: ${sendFileResult.message}`,
+                            true
+                        );
+                    } else {
+                        successAssets++;
+                        logMessage('success', `File ${chalk.magenta(asset)} uploaded.`, true);
+                    }
+                }
+                else {
                     errorAssets++;
-                    logMessage(
-                        'error',
-                        `Error when uploading file ${chalk.magenta(asset)}. Error: ${sendFileResult.message}`,
-                        true
-                    );
-                } else {
-                    successAssets++;
-                    logMessage('success', `File ${chalk.magenta(asset)} uploaded.`, true);
+                    logMessage('error', `File extension not allowed (${chalk.magenta(asset)})`, true);
                 }
             }
 

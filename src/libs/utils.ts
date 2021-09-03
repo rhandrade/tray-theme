@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { isBinaryFileSync } from 'isbinaryfile';
 import { readFile, writeFile } from 'fs/promises';
 import { dirname } from 'path';
 
@@ -155,4 +156,16 @@ export function checkFileUploadPermission (filename: string) {
     })
 
     return allowed;
+}
+
+export function prepareToUpload (filename: string) {
+    const assetStartingWithSlash = filename.startsWith('/') ? filename : `/${filename}`;
+    const fileContent = readFileSync(`.${assetStartingWithSlash}`);
+    const isBinary = isBinaryFileSync(`.${assetStartingWithSlash}`);
+
+    return {
+        assetStartingWithSlash: assetStartingWithSlash,
+        fileContent: fileContent,
+        isBinary: isBinary
+    }
 }

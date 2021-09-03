@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
 import { program } from 'commander';
 import { TrayApi } from '../api/v1/TrayApi';
-import { loadConfigFile, logMessage, checkFileUploadPermission } from '../libs/utils';
+import { loadConfigFile, logMessage, checkFileUploadPermission, prepareToUpload } from '../libs/utils';
 
 export function watch() {
     program.command('watch').action(async () => {
@@ -34,23 +34,31 @@ export function watch() {
             .on('add', async (path) => {
                 const asset = slash(path);
 
-                const assetStartingWithSlash = asset.startsWith('/') ? asset : `/${asset}`;
+                const isAllowed = checkFileUploadPermission(asset);
 
-                const fileContent = readFileSync(`.${assetStartingWithSlash}`);
-                const isBinary = isBinaryFileSync(`.${assetStartingWithSlash}`);
+                if ( isAllowed ) {
+                    const {
+                        assetStartingWithSlash,
+                        fileContent,
+                        isBinary
+                    } = prepareToUpload(asset);
 
-                logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
+                    logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
 
-                const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
+                    const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
 
-                if (!sendFileResult.success) {
-                    logMessage(
-                        'error',
-                        `Error when uploading file ${chalk.magenta(asset)}. Error: ${sendFileResult.message}`,
-                        true
-                    );
-                } else {
-                    logMessage('success', `File ${chalk.magenta(asset)} uploaded`, true);
+                    if (!sendFileResult.success) {
+                        logMessage(
+                            'error',
+                            `Error when uploading file ${chalk.magenta(asset)}. Error: ${sendFileResult.message}`,
+                            true
+                        );
+                    } else {
+                        logMessage('success', `File ${chalk.magenta(asset)} uploaded`, true);
+                    }                    
+                }
+                else {
+                    logMessage('error', `File extension not allowed (${chalk.magenta(asset)})`, true);
                 }
             })
 
@@ -60,10 +68,11 @@ export function watch() {
                 const isAllowed = checkFileUploadPermission(asset);
 
                 if ( isAllowed ) {
-                    const assetStartingWithSlash = asset.startsWith('/') ? asset : `/${asset}`;
-
-                    const fileContent = readFileSync(`.${assetStartingWithSlash}`);
-                    const isBinary = isBinaryFileSync(`.${assetStartingWithSlash}`);
+                    const {
+                        assetStartingWithSlash,
+                        fileContent,
+                        isBinary
+                    } = prepareToUpload(asset);
 
                     logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
 
