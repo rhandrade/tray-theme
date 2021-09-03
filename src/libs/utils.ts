@@ -127,3 +127,32 @@ export function logMessage(type: LogMessageType, message: string, done: boolean 
         log.done();
     }
 }
+
+export function checkFileUploadPermission (filename: string) {
+    const allowedExtensions = [
+        '.css',
+        '.eot',
+        '.gif',
+        '.html',
+        '.jpeg',
+        '.jpg',
+        '.js',
+        '.json',
+        '.png',
+        '.svg',
+        '.ttf',
+        '.woff',
+        '.woff2'
+    ];
+
+    let allowed = false;
+
+    allowedExtensions.forEach( (extension) => {
+        if (filename.endsWith(extension)) {
+            allowed = true;
+            return;
+        }
+    })
+
+    return allowed;
+}
