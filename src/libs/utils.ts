@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync } from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
 import { readFile, writeFile } from 'fs/promises';
-import { dirname } from 'path';
+import { dirname, extname } from 'path';
 
 import yaml from 'yaml';
 import chalk from 'chalk';
@@ -146,16 +146,62 @@ export function checkFileUploadPermission (filename: string) {
         '.woff2'
     ];
 
-    let allowed = false;
+    const allowedFolders = [
+        'configs',
+        'css',
+        'elements',
+        'img',
+        'js',
+        'layouts',
+        'pages'
+    ]
 
-    allowedExtensions.forEach( (extension) => {
-        if (filename.endsWith(extension)) {
-            allowed = true;
-            return;
-        }
-    })
+    const ignoredFolders = [
+        '.idea',
+        '.vscode',
+        'node_modules',
+        'dist'
+    ]
 
-    return allowed;
+    const allowedParentFolders = [
+        'css',
+        'elements',
+        'img',
+        'js'
+    ]
+
+    const extension = extname(filename);
+    const parentFolder = dirname(filename).split('/')[0];
+
+    if ( ignoredFolders.includes(parentFolder) ) {
+        return { isAllowed: false };
+    }
+
+    if (!allowedExtensions.includes(extension)) {
+        return {
+            isAllowed: false,
+            message: `File extension not allowed (${chalk.magenta(extension)})`
+        };
+    }
+
+    if (!allowedFolders.includes(parentFolder)) {
+        return {
+            isAllowed: false,
+            message: `You cannot create or upload to this folder (${chalk.magenta(parentFolder)})`
+        };
+    }
+
+    if (
+        dirname(filename).split('/').length > 1
+        && !allowedParentFolders.includes(parentFolder)
+    ) {
+        return {
+            isAllowed: false,
+            message: `You cannot create subfolders in this folder (${chalk.magenta(parentFolder)})`
+        };
+    }
+    
+    return { isAllowed: true };
 }
 
 export function prepareToUpload (filename: string) {

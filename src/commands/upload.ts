@@ -40,7 +40,10 @@ export function upload() {
             for (const path of assets) {
                 const asset = slash(path);
 
-                const isAllowed = checkFileUploadPermission(asset);
+                const {
+                    isAllowed,
+                    message
+                } = checkFileUploadPermission(asset);
 
                 if ( isAllowed ) {
                     logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
@@ -66,9 +69,9 @@ export function upload() {
                         logMessage('success', `File ${chalk.magenta(asset)} uploaded.`, true);
                     }
                 }
-                else {
+                else if (message) {
                     errorAssets++;
-                    logMessage('error', `File extension not allowed (${chalk.magenta(asset)})`, true);
+                    logMessage('error', message, true);
                 }
             }
 

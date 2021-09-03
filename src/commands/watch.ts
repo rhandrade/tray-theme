@@ -34,7 +34,10 @@ export function watch() {
             .on('add', async (path) => {
                 const asset = slash(path);
 
-                const isAllowed = checkFileUploadPermission(asset);
+                const {
+                    isAllowed,
+                    message
+                } = checkFileUploadPermission(asset);
 
                 if ( isAllowed ) {
                     const {
@@ -57,15 +60,18 @@ export function watch() {
                         logMessage('success', `File ${chalk.magenta(asset)} uploaded`, true);
                     }                    
                 }
-                else {
-                    logMessage('error', `File extension not allowed (${chalk.magenta(asset)})`, true);
+                else if (message) {
+                    logMessage('error', message, true);
                 }
             })
 
             .on('change', async (path) => {
                 const asset = slash(path);
 
-                const isAllowed = checkFileUploadPermission(asset);
+                const {
+                    isAllowed,
+                    message
+                } = checkFileUploadPermission(asset);
 
                 if ( isAllowed ) {
                     const {
@@ -78,18 +84,21 @@ export function watch() {
 
                     const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
 
+
                     if (!sendFileResult.success) {
+                        console.log(sendFileResult);
                         logMessage(
                             'error',
                             `Error when uploading file ${chalk.magenta(asset)}. Error: ${sendFileResult.message}`,
                             true
                         );
                     } else {
+                        console.log(sendFileResult);
                         logMessage('success', `File ${chalk.magenta(asset)} uploaded`, true);
                     }                    
                 }
-                else {
-                    logMessage('error', `File extension not allowed (${chalk.magenta(asset)})`, true);
+                else if (message) {
+                    logMessage('error', message, true);
                 }
             })
 
