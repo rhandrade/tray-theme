@@ -21,7 +21,7 @@ export function cleanCache() {
 
             const { key, password, themeId } = resultLoadFile.config;
 
-            logMessage('error', `Cleaning cache from configured theme id ${theme_id || themeId}...`);
+            logMessage('pending', `Cleaning cache from configured theme id ${theme_id || themeId}...`);
 
             const api = new TrayApi({ key, password, themeId });
             const cleanCacheResult = theme_id ? await api.cleanCache(theme_id) : await api.cleanCache();
