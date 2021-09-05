@@ -148,4 +148,4 @@ Criado por [Rafael Andrade](https://github.com/rhandrade/).
 
 ## Licença
 
-[MIT](LICENSE)
+[MIT](license.md)
