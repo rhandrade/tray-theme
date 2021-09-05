@@ -1,9 +1,32 @@
 # Tray Theme
 
+![npm](https://img.shields.io/npm/v/tray-theme?logo=npm&style=for-the-badge) ![node-current](https://img.shields.io/node/v/tray-theme?logo=node.js&logoColor=%23fff&style=for-the-badge)
+
 Interface de linha de comando desenvolvida em Node.js e TypeScript para ajudar desenvolvedores a criarem ótimos temas para Tray.
 
 > **Atenção**
 > Esse programa está em fase de desenvolvimento e portanto não garantimos o correto funcionamento. Ajude-nos reportando problemas ao utilizá-lo.
+
+## Índice
+
+-   [Instalação](#instalação)
+-   [Roadmap](#roadmap)
+-   [Comandos disponíveis](#comandos-disponíveis)
+    -   [tray help [command]](#tray-help-command)
+    -   [tray configure [key] [password] [theme_id]](#tray-configure-key-password-theme_id)
+    -   [tray themes](#tray-themes)
+    -   [tray new \<key\> \<password\> \<theme_name\> [theme_base]](#tray-new-key-password-theme_name-theme_base)
+    -   [tray clean-cache [theme_base]](#tray-clean-cache-theme_base)
+    -   [tray delete-theme <theme_id>](#tray-delete-theme-theme_id)
+    -   [tray download [files...]](#tray-download-files)
+    -   [tray upload [files...]](#tray-upload-files)
+    -   [tray delete-file <files...>](#tray-delete-file-files)
+    -   [tray rm <files...>](#tray-rm-files)
+    -   [tray watch](#tray-watch)
+    -   [tray open](#tray-open)
+-   [Contribuidores](#contribuidores)
+-   [Créditos](#créditos)
+-   [Licença](#licença)
 
 ## Instalação
 
@@ -19,23 +42,9 @@ npm install tray-theme
 
 Se desejar não fazer a instalação global, todos os comando abaixo precisaram ter acrescido `npx` antes para que ele seja executado da instalação local.
 
-## Etapas do projeto
+## Roadmap
 
-Esse projeto será divido em várias etapas. Você pode conferir a progresso pelos itens abaixo:
-
--   [x] Mapear URLs básicas do Opencode
--   [x] Mapear funções do CLI
--   [x] Implementar SDK JS para Opencode
--   [x] Implementar comandos do CLI
--   [x] Lançar versão 1.0-alpha no npm
--   [x] Separar comandos em arquivos próprios
--   [ ] Melhorar estrutura do projeto
--   [ ] Melhorar comunicação das mensagens
--   [ ] Melhorar detecção e tratamento de erros
--   [ ] Realizar testes em multiplas versões do Node.js
--   [ ] Realizar testes em vários sistemas operacionais
--   [ ] Versão 1.0-beta
--   [ ] Versão 1.0 final
+Acompanhe a evolução do projeto através das issues e das milestones definidas [nessa página](https://github.com/rhandrade/tray-theme/milestones).
 
 ## Comandos disponíveis
 
@@ -64,11 +73,11 @@ Cria um novo tema na plataforma.
 -   `theme_name` - Nome que deseja dar ao tema
 -   `theme_base` - Tema no qual o novo tema será baseado.
 
-### tray clean_cache [theme_base]
+### tray clean-cache [theme_base]
 
 Limpa os caches de um tema. Se o parâmetro `theme_base` não for informado, o programa limpará o cache do tema configurado, caso contrário do tema informado.
 
-### tray delete_theme <theme_id>
+### tray delete-theme <theme_id>
 
 Delete o tema informado. Esse comando precisa de confirmação para ser executado. Por padrão ao dar o Enter ao ser perguntado o comando será abortado. Precise Y para confirmar a exclusão. **Atenção!** essa operação não poderá ser desfeita.
 
@@ -124,3 +133,17 @@ Apesar do programa suportar todas as operações que o sistema permite, nem toda
 ### tray open
 
 Abre a url de preview do tema no navegador padrão.
+
+## Contribuidores
+
+Esse projeto foi criado a partir do desejo da comunidade de desenvolvedores da Tray por um CLI mais atualizado e responsivo. Obrigado a todos que contribuem com o desenvolvimento do projeto, seja reportando problemas, melhorias ou enviando códigos 🙂🎉.
+
+Agradecimento especial a [Netzee - Agência de E-commerce](https://www.netzee.com.br) por fornecer acesso a plataforma Tray e ter permitido o surgimento desse projeto.
+
+## Créditos
+
+Criado por [Rafael Andrade](https://github.com/rhandrade/).
+
+## Licença
+
+[MIT](LICENSE)
