@@ -1,6 +1,8 @@
 # Tray Theme
 
-![npm](https://img.shields.io/npm/v/tray-theme?logo=npm&style=for-the-badge) ![node-current](https://img.shields.io/node/v/tray-theme?logo=node.js&logoColor=%23fff&style=for-the-badge)
+[![npm](https://img.shields.io/npm/v/tray-theme?logo=npm&style=flat-square)](https://www.npmjs.com/package/tray-theme)
+![node-current](https://img.shields.io/node/v/tray-theme?logo=node.js&logoColor=%23fff&style=flat-square)
+[![npm downloads](https://img.shields.io/npm/dm/tray-theme?style=flat-square)](http://npm-stat.com/charts.html?package=tray-theme)
 
 Interface de linha de comando desenvolvida em Node.js e TypeScript para ajudar desenvolvedores a criarem ótimos temas para Tray.
 
