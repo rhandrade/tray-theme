@@ -1,10 +1,11 @@
-import { existsSync, mkdirSync } from 'fs';
-import { readFile, writeFile } from 'fs/promises';
+import { existsSync, mkdirSync, promises as fsp } from 'fs';
 import { dirname } from 'path';
 
 import yaml from 'yaml';
 import chalk from 'chalk';
 import log from 'log-update';
+
+const { readFile, writeFile } = fsp;
 
 interface IConfigFile {
     key: string;
