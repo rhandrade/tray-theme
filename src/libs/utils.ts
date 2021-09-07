@@ -1,6 +1,5 @@
 import { existsSync, mkdirSync, readFileSync, promises as fsp } from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
-import { readFile, writeFile } from 'fs/promises';
 import { dirname, extname } from 'path';
 
 import yaml from 'yaml';
