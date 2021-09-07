@@ -130,7 +130,7 @@ export function logMessage(type: LogMessageType, message: string, done: boolean 
     }
 }
 
-export function checkFileUploadPermission (filename: string) {
+export function validateFileIsAllowed (filename: string) {
     const allowedExtensions = [
         '.css',
         '.eot',

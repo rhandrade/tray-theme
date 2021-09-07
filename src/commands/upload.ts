@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
 import { program } from 'commander';
 import { TrayApi } from '../api/v1/TrayApi';
-import { loadConfigFile, logMessage, checkFileUploadPermission, prepareToUpload } from '../libs/utils';
+import { loadConfigFile, logMessage, validateFileIsAllowed, prepareToUpload } from '../libs/utils';
 
 /**
  * Upload one or more files for theme
@@ -43,7 +43,7 @@ export function upload() {
                 const {
                     isAllowed,
                     message
-                } = checkFileUploadPermission(asset);
+                } = validateFileIsAllowed(asset);
 
                 if ( isAllowed ) {
                     logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);

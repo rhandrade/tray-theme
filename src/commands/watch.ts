@@ -5,7 +5,7 @@ import { readFileSync } from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
 import { program } from 'commander';
 import { TrayApi } from '../api/v1/TrayApi';
-import { loadConfigFile, logMessage, checkFileUploadPermission, prepareToUpload } from '../libs/utils';
+import { loadConfigFile, logMessage, validateFileIsAllowed, prepareToUpload } from '../libs/utils';
 
 export function watch() {
     program.command('watch').action(async () => {
@@ -37,7 +37,7 @@ export function watch() {
                 const {
                     isAllowed,
                     message
-                } = checkFileUploadPermission(asset);
+                } = validateFileIsAllowed(asset);
 
                 if ( isAllowed ) {
                     const {
@@ -71,7 +71,7 @@ export function watch() {
                 const {
                     isAllowed,
                     message
-                } = checkFileUploadPermission(asset);
+                } = validateFileIsAllowed(asset);
 
                 if ( isAllowed ) {
                     const {
