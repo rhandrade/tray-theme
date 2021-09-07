@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, promises as fsp } from 'fs';
 import { isBinaryFileSync } from 'isbinaryfile';
 import { readFile, writeFile } from 'fs/promises';
 import { dirname, extname } from 'path';
@@ -6,6 +6,8 @@ import { dirname, extname } from 'path';
 import yaml from 'yaml';
 import chalk from 'chalk';
 import log from 'log-update';
+
+const { readFile, writeFile } = fsp;
 
 interface IConfigFile {
     key: string;
