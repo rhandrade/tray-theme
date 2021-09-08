@@ -130,7 +130,32 @@ export function logMessage(type: LogMessageType, message: string, done: boolean 
     }
 }
 
-export function validateFileIsAllowed (filename: string) {
+/*
+    Checks whether the folder should be ignored.
+    Does not log any messages
+*/
+function validateShouldUploadFile (parentFolder: string) {
+    const ignoredFolders = [
+        '.idea',
+        '.vscode',
+        'node_modules',
+        'dist'
+    ]
+
+    if ( ignoredFolders.includes(parentFolder) ) {
+        return {
+            isAllowed: false,
+            message: null
+        };
+    }
+
+    return { isAllowed: true };  
+}
+
+/*
+    Checks whether the file extension is allowed
+*/
+function validateExtension (extension: string) {
     const allowedExtensions = [
         '.css',
         '.eot',
@@ -147,6 +172,20 @@ export function validateFileIsAllowed (filename: string) {
         '.woff2'
     ];
 
+    if (!allowedExtensions.includes(extension)) {
+        return {
+            isAllowed: false,
+            message: `File extension not allowed (${chalk.magenta(extension)})`
+        };
+    }
+
+    return { isAllowed: true };  
+}
+
+/*
+    Checks whether the folder accepts uploads at all
+*/
+function validateShouldUploadToFolder (parentFolder: string) {
     const allowedFolders = [
         'configs',
         'css',
@@ -157,12 +196,21 @@ export function validateFileIsAllowed (filename: string) {
         'pages'
     ]
 
-    const ignoredFolders = [
-        '.idea',
-        '.vscode',
-        'node_modules',
-        'dist'
-    ]
+    if (!allowedFolders.includes(parentFolder)) {
+        return {
+            isAllowed: false,
+            message: `You cannot create or upload to this folder (${chalk.magenta(parentFolder)})`
+        };
+    }
+
+    return { isAllowed: true };  
+}
+
+/*
+    Checks whether the folder allow the creation of subfolders
+*/
+function validateCanHaveSubfolders (filePath: string) {
+    const parentFolder = filePath.split('/')[0];
 
     const allowedParentFolders = [
         'css',
@@ -171,29 +219,12 @@ export function validateFileIsAllowed (filename: string) {
         'js'
     ]
 
-    const extension = extname(filename);
-    const parentFolder = dirname(filename).split('/')[0];
-
-    if ( ignoredFolders.includes(parentFolder) ) {
-        return { isAllowed: false };
-    }
-
-    if (!allowedExtensions.includes(extension)) {
-        return {
-            isAllowed: false,
-            message: `File extension not allowed (${chalk.magenta(extension)})`
-        };
-    }
-
-    if (!allowedFolders.includes(parentFolder)) {
-        return {
-            isAllowed: false,
-            message: `You cannot create or upload to this folder (${chalk.magenta(parentFolder)})`
-        };
-    }
-
+    /*
+        If the filePath has more than one element separated by slashes,
+        it means the upload would happen on a subfolder
+    */
     if (
-        dirname(filename).split('/').length > 1
+        filePath.split('/').length > 1
         && !allowedParentFolders.includes(parentFolder)
     ) {
         return {
@@ -201,10 +232,50 @@ export function validateFileIsAllowed (filename: string) {
             message: `You cannot create subfolders in this folder (${chalk.magenta(parentFolder)})`
         };
     }
-    
+
+    return { isAllowed: true };  
+}
+
+/*
+    FILE UPLOAD VALIDATION
+    Performs several checks to identify whether the file should be uploaded.
+*/
+export function validateFileIsAllowed (filename: string) {
+    const extension = extname(filename);
+    const filePath = dirname(filename);
+    const parentFolder = filePath.split('/')[0];
+
+    const shouldUploadValidation = validateShouldUploadFile(parentFolder);
+
+    if ( !shouldUploadValidation.isAllowed ) {
+        return shouldUploadValidation;
+    }    
+
+    const extensionValidation = validateExtension(extension);
+
+    if ( !extensionValidation.isAllowed ) {
+        return extensionValidation;
+    }
+
+    const shouldUploadToFolderValidation = validateShouldUploadToFolder(parentFolder);
+
+    if ( !shouldUploadToFolderValidation.isAllowed ) {
+        return shouldUploadToFolderValidation;
+    }
+
+    const canHaveSubfoldersValidation = validateCanHaveSubfolders(filePath);
+
+    if ( !canHaveSubfoldersValidation.isAllowed ) {
+        return canHaveSubfoldersValidation;
+    }
+
     return { isAllowed: true };
 }
 
+/*
+    PREPARE TO UPLOAD
+    Converts all of the file's data to a format that the API can accept
+*/
 export function prepareToUpload (filename: string) {
     const assetStartingWithSlash = filename.startsWith('/') ? filename : `/${filename}`;
     const fileContent = readFileSync(`.${assetStartingWithSlash}`);
