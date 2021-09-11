@@ -12,7 +12,7 @@ import { deleteFile } from './commands/deleteFile';
 import { watch } from './commands/watch';
 import { open } from './commands/open';
 
-const CLI_VERSION = '1.0.0-beta-1';
+const CLI_VERSION = '1.0.0-beta-2';
 
 export function run() {
     configure();
