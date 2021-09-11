@@ -63,7 +63,7 @@ export function configure() {
             const resultCheckConfig: any = await api.checkConfiguration();
 
             if (!resultCheckConfig.success) {
-                logMessage('error', 'Api key, password or theme id not correctly. Please verify and tray again.', true);
+                logMessage('error', 'Incorrect API key, password or theme id. Please verify and try again.', true);
                 process.exit();
             }
 
