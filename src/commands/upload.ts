@@ -13,9 +13,32 @@ import { dirname, extname } from 'path';
 export function upload() {
     program
         .command('upload')
+        .option('-c, --core')
         .arguments('[files...]')
         .action(async (files: string[], options) => {
             let assets = files;
+
+            if ( options.core && assets.length ) {
+                logMessage(
+                    'error',
+                    `Either choose between ${chalk.magenta('upload -c|--core')} or ${chalk.magenta('upload [files...]')}`,
+                    true
+                );
+                return false;           
+            }
+
+            // Uploads only "core" files
+            if ( options.core ) {
+                assets = [
+                    'configs/settings.html', // Does not include settings.json to avoid ovewriting live test data
+                    'css/**/*',
+                    'elements/**/*',
+                    'js/**/*',
+                    'layouts/**/*',
+                    'pages/**/*'
+                ]
+            }
+
             let globbedAssets = [];
 
             // If no argument is provided, globs the whole folder
