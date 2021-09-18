@@ -24,7 +24,7 @@ export function upload() {
                     `Either choose between ${chalk.magenta('upload -c|--core')} or ${chalk.magenta('upload [files...]')}`,
                     true
                 );
-                return false;           
+                process.exit();         
             }
 
             // Uploads only "core" files
