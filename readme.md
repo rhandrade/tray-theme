@@ -6,9 +6,6 @@
 
 Interface de linha de comando desenvolvida em Node.js e TypeScript para ajudar desenvolvedores a criarem ótimos temas para Tray.
 
-> **Atenção**
-> Esse programa está em fase de desenvolvimento e portanto não garantimos o correto funcionamento. Ajude-nos reportando problemas ao utilizá-lo.
-
 ## Índice
 
 -   [Instalação](#instalação)

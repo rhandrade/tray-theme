@@ -25,6 +25,14 @@ export function newTheme() {
                 process.exit();
             }
 
+            if (theme_base) {
+                logMessage(
+                    'warning',
+                    `The theme_base parameter has an API issue identified and may not be respected, creating a theme based on default theme.`,
+                    true
+                );
+            }
+
             logMessage('pending', `Creating theme ${chalk.magenta(theme_name)} on store...`);
 
             const resultCreationTheme: any = theme_base
