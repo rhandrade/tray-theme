@@ -1,12 +1,10 @@
 import chalk from 'chalk';
 import glob from 'glob';
 import slash from 'slash';
-import { readFileSync } from 'fs';
-import { isBinaryFileSync } from 'isbinaryfile';
 import { program } from 'commander';
+import { extname } from 'path';
 import { TrayApi } from '../api/v1/TrayApi';
 import { loadConfigFile, logMessage, validateFileIsAllowed, prepareToUpload } from '../libs/utils';
-import { extname } from 'path';
 
 /**
  * Upload one or more files for theme
@@ -14,69 +12,53 @@ import { extname } from 'path';
 export function upload() {
     program
         .command('upload')
-        .option('-c, --core')
+        .description('Upload specified files to opencode servers.\nFolder paths are not supported and will be ignored.')
+        .option('-c, --core', 'Upload all theme files, except for settings.json and images folder')
         .arguments('[files...]')
         .action(async (files: string[], options) => {
             let assets = files;
 
-            if ( options.core && assets.length ) {
+            if (options.core && assets.length) {
                 logMessage(
                     'error',
-                    `Either choose between ${chalk.magenta('upload -c|--core')} or ${chalk.magenta('upload [files...]')}`,
+                    `Upload command with core option could not be used together with files parameter.`,
                     true
                 );
-                process.exit();         
+                process.exit();
             }
 
-            // Uploads only "core" files
-            if ( options.core ) {
+            if (options.core) {
                 assets = [
-                    'configs/settings.html', // Does not include settings.json to avoid ovewriting live test data
+                    'configs/settings.html',
                     'css/**/*',
                     'elements/**/*',
                     'js/**/*',
                     'layouts/**/*',
-                    'pages/**/*'
-                ]
+                    'pages/**/*',
+                ];
             }
 
-            let globbedAssets = [];
+            let globbedAssets: any[] = [];
 
-            // If no argument is provided, globs the whole folder
             if (!assets.length) {
-                globbedAssets = glob.sync('**/*');
-            }
-            else {
-                for (const asset of assets) {
-                    // If it looks like a folder...
-                    if (!extname(asset)) {
-                        // ... but could be a glob pattern...
-                        if (asset.split('/').length > 1) {
-                            // ... Executes glob.sync() and pushes the results to the assets list
-                            globbedAssets.push(glob.sync(asset));
-                        }
-                        // If it is a folder...
-                        else {
-                            logMessage(
-                                'error',
-                                `${chalk.magenta(asset)} seems to be a folder name, and cannot be directly uploaded. Did you mean ${chalk.blue(`${asset}/*`)} ?`,
-                                true
-                            );
-                        }
+                globbedAssets = glob.sync('**/*', { nodir: true });
+            } else {
+                assets.forEach((asset) => {
+                    if (glob.hasMagic(asset) || extname(asset)) {
+                        globbedAssets.push(glob.sync(asset, { nodir: true }));
                     }
-                    // If it's a file, pushes it to the assets list
-                    else {
-                        globbedAssets.push(asset);                    
-                    }
-                }                
+                });
             }
-            
-            // Flattens the array of files and globs
+
             let fullAssetsList = globbedAssets.flat();
+            fullAssetsList = fullAssetsList.filter((item) => item !== 'config.yml');
 
-            // Filters out remaining folder names found by glob patterns
-            fullAssetsList = fullAssetsList.filter( (asset) => extname(asset) );
+            if (!fullAssetsList.length) {
+                logMessage('info', `${chalk.yellow('[Aborted]')} Nothing to uploading...`, true);
+                process.exit();
+            }
 
+            logMessage('info', `${chalk.yellow('[Warn]')} Folder paths are not supported and will be ignored.`, true);
             logMessage('info', `Uploading ${fullAssetsList.length} files...`, true);
 
             const resultLoadFile: any = await loadConfigFile();
@@ -92,27 +74,19 @@ export function upload() {
             let successAssets = 0;
             let errorAssets = 0;
 
-
-            for (const asset of fullAssetsList) {
+            for (const path of fullAssetsList) {
                 const asset = slash(path);
 
-                const {
-                    isAllowed,
-                    message
-                } = validateFileIsAllowed(asset);
+                const { isAllowed, message } = validateFileIsAllowed(asset);
 
-                if ( isAllowed ) {
+                if (isAllowed) {
                     logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
 
-                    const {
-                        assetStartingWithSlash,
-                        fileContent,
-                        isBinary
-                    } = prepareToUpload(asset);
-                    
+                    const { assetStartingWithSlash, fileContent, isBinary } = prepareToUpload(asset);
+
                     // eslint-disable-next-line no-await-in-loop
                     const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
-                    
+
                     if (!sendFileResult.success) {
                         errorAssets++;
                         logMessage(
@@ -124,8 +98,7 @@ export function upload() {
                         successAssets++;
                         logMessage('success', `File ${chalk.magenta(asset)} uploaded.`, true);
                     }
-                }
-                else if (message) {
+                } else if (message) {
                     errorAssets++;
                     logMessage('error', message, true);
                 }

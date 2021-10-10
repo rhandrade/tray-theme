@@ -12,7 +12,7 @@ import { deleteFile } from './commands/deleteFile';
 import { watch } from './commands/watch';
 import { open } from './commands/open';
 
-const CLI_VERSION = '1.0.0';
+const pkg = require('../package.json');
 
 export function run() {
     configure();
@@ -26,6 +26,6 @@ export function run() {
     watch();
     open();
 
-    program.version(CLI_VERSION).name('tray');
+    program.version(pkg.version).name('tray');
     program.parse(process.argv);
 }

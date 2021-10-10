@@ -1,8 +1,6 @@
 import chalk from 'chalk';
 import chokidar from 'chokidar';
 import slash from 'slash';
-import { readFileSync } from 'fs';
-import { isBinaryFileSync } from 'isbinaryfile';
 import { program } from 'commander';
 import { TrayApi } from '../api/v1/TrayApi';
 import { loadConfigFile, logMessage, validateFileIsAllowed, prepareToUpload } from '../libs/utils';
@@ -34,17 +32,10 @@ export function watch() {
             .on('add', async (path) => {
                 const asset = slash(path);
 
-                const {
-                    isAllowed,
-                    message
-                } = validateFileIsAllowed(asset);
+                const { isAllowed, message } = validateFileIsAllowed(asset);
 
-                if ( isAllowed ) {
-                    const {
-                        assetStartingWithSlash,
-                        fileContent,
-                        isBinary
-                    } = prepareToUpload(asset);
+                if (isAllowed) {
+                    const { assetStartingWithSlash, fileContent, isBinary } = prepareToUpload(asset);
 
                     logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
 
@@ -58,9 +49,8 @@ export function watch() {
                         );
                     } else {
                         logMessage('success', `File ${chalk.magenta(asset)} uploaded`, true);
-                    }                    
-                }
-                else if (message) {
+                    }
+                } else if (message) {
                     logMessage('error', message, true);
                 }
             })
@@ -68,22 +58,14 @@ export function watch() {
             .on('change', async (path) => {
                 const asset = slash(path);
 
-                const {
-                    isAllowed,
-                    message
-                } = validateFileIsAllowed(asset);
+                const { isAllowed, message } = validateFileIsAllowed(asset);
 
-                if ( isAllowed ) {
-                    const {
-                        assetStartingWithSlash,
-                        fileContent,
-                        isBinary
-                    } = prepareToUpload(asset);
+                if (isAllowed) {
+                    const { assetStartingWithSlash, fileContent, isBinary } = prepareToUpload(asset);
 
                     logMessage('pending', `Uploading file ${chalk.magenta(asset)}...`);
 
                     const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
-
 
                     if (!sendFileResult.success) {
                         console.log(sendFileResult);
@@ -95,9 +77,8 @@ export function watch() {
                     } else {
                         console.log(sendFileResult);
                         logMessage('success', `File ${chalk.magenta(asset)} uploaded`, true);
-                    }                    
-                }
-                else if (message) {
+                    }
+                } else if (message) {
                     logMessage('error', message, true);
                 }
             })
