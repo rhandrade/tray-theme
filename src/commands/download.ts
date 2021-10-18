@@ -47,19 +47,23 @@ export function download() {
                 // eslint-disable-next-line no-await-in-loop
                 const response: any = await api.getThemeAsset(file.startsWith('/') ? file : `/${file}`);
 
-                const { path, content } = response.asset;
-
-                // eslint-disable-next-line no-await-in-loop
-                const saveFileResult: any = await saveAssetFile(path, content);
-
-                if (!saveFileResult.success) {
-                    logMessage(
-                        'error',
-                        `Error when saving file ${chalk.magenta(file)}. Error: ${saveFileResult.message}.`,
-                        true
-                    );
+                if (!response.success) {
+                    logMessage('error', response.message, true);
                 } else {
-                    logMessage('success', `File ${chalk.magenta(file)} downloaded.`, true);
+                    const { path, content } = response.asset;
+
+                    // eslint-disable-next-line no-await-in-loop
+                    const saveFileResult: any = await saveAssetFile(path, content);
+
+                    if (!saveFileResult.success) {
+                        logMessage(
+                            'error',
+                            `Error when saving file ${chalk.magenta(file)}. Error: ${saveFileResult.message}.`,
+                            true
+                        );
+                    } else {
+                        logMessage('success', `File ${chalk.magenta(file)} downloaded.`, true);
+                    }
                 }
             }
 

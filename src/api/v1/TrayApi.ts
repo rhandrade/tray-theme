@@ -1,5 +1,6 @@
 import axios, { AxiosRequestConfig } from 'axios';
 import FileType from 'file-type';
+import { saveAssetFile } from '../../libs/utils';
 
 interface ITrayApi {
     key: string;
@@ -54,10 +55,19 @@ class TrayApi {
                 success: true,
                 previewUrl: this.themeId ? response.data.preview : null,
             }))
-            .catch((error) => ({
-                success: false,
-                message: error.response.data.message,
-            }));
+            .catch((error) => {
+                let message;
+                if (error.response && error.response.data) {
+                    message = error.response.data.message;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
+                }
+
+                return {
+                    success: false,
+                    message,
+                };
+            });
     }
 
     /**
@@ -80,10 +90,19 @@ class TrayApi {
                 success: true,
                 themes: response.data.themes,
             }))
-            .catch((error) => ({
-                success: false,
-                message: error.response.data.message,
-            }));
+            .catch((error) => {
+                let message;
+                if (error.response && error.response.data) {
+                    message = error.response.data.message;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
+                }
+
+                return {
+                    success: false,
+                    message,
+                };
+            });
     }
 
     /**
@@ -116,10 +135,19 @@ class TrayApi {
                 themeId: data.theme_id,
                 previewUrl: data.preview,
             }))
-            .catch(({ response }) => ({
-                success: false,
-                message: response.data.message,
-            }));
+            .catch((error) => {
+                let message;
+                if (error.response && error.response.data) {
+                    message = error.response.data.message;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
+                }
+
+                return {
+                    success: false,
+                    message,
+                };
+            });
     }
 
     /**
@@ -153,10 +181,19 @@ class TrayApi {
                     message: response.data.response.message,
                 };
             })
-            .catch((error) => ({
-                success: false,
-                message: error.response.data.message,
-            }));
+            .catch((error) => {
+                let message;
+                if (error.response && error.response.data) {
+                    message = error.response.data.message ?? error.response.data.error;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
+                }
+
+                return {
+                    success: false,
+                    message,
+                };
+            });
     }
 
     /**
@@ -178,16 +215,23 @@ class TrayApi {
             .request(config)
             .then(() => ({ success: true }))
             .catch((error) => {
-                if (error.response.data.message.includes("undefined method `id'")) {
-                    return {
-                        success: true,
-                        message: 'False negative detected. Api returns error but theme was removed.',
-                    };
+                let message;
+                if (error.response && error.response.data) {
+                    if (error.response.data.message.includes("undefined method `id'")) {
+                        return {
+                            success: true,
+                            message: 'False negative detected. Api returns error but theme was removed.',
+                        };
+                    }
+
+                    message = error.response.data.message;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
                 }
 
                 return {
                     success: false,
-                    message: error.response.data.message,
+                    message,
                 };
             });
     }
@@ -213,10 +257,19 @@ class TrayApi {
                 quantity: response.data.meta.total,
                 assets: response.data.assets,
             }))
-            .catch((error) => ({
-                success: false,
-                message: error.response.data.message ?? error.response.data.error,
-            }));
+            .catch((error) => {
+                let message;
+                if (error.response && error.response.data) {
+                    message = error.response.data.message ?? error.response.data.error;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
+                }
+
+                return {
+                    success: false,
+                    message,
+                };
+            });
     }
 
     /**
@@ -251,10 +304,20 @@ class TrayApi {
                     },
                 };
             })
-            .catch((error) => ({
-                success: false,
-                message: error.response.data.message ?? error.response.data.error,
-            }));
+            .catch(async (error) => {
+                let message;
+                if (error.response && error.response.data) {
+                    message = error.response.data.message ?? error.response.data.error;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
+                    await saveAssetFile('./.degub.log', Buffer.from(JSON.stringify(error, null, 4), 'utf8'));
+                }
+
+                return {
+                    success: false,
+                    message,
+                };
+            });
     }
 
     async sendThemeAsset(asset: string, data: Buffer, isBinary: boolean = false): Promise<any> {
@@ -275,13 +338,25 @@ class TrayApi {
             .then(() => ({
                 success: true,
             }))
-            .catch((error) => ({
-                success: false,
-                message:
-                    error.response.status < 500
-                        ? error.response.data.message
-                        : 'Api return status 500 - Internal server error',
-            }));
+            .catch(async (error) => {
+                let message;
+                if (error.response && error.response.data) {
+                    message =
+                        error.response.status < 500
+                            ? error.response.data.message
+                            : 'Api return status 500 - Internal server error';
+
+                    await saveAssetFile('./.degub.log', Buffer.from(JSON.stringify(error, null, 4), 'utf8'));
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
+                    await saveAssetFile('./.degub.log', Buffer.from(JSON.stringify(error, null, 4), 'utf8'));
+                }
+
+                return {
+                    success: false,
+                    message,
+                };
+            });
     }
 
     deleteThemeAsset(asset: string) {
@@ -302,16 +377,23 @@ class TrayApi {
             .request(config)
             .then(() => ({ success: true }))
             .catch((error) => {
-                if (error.response.data.message.includes("undefined local variable or method `upfile_updated'")) {
-                    return {
-                        success: true,
-                        message: 'False negative detected. Api returns error but file was removed.',
-                    };
+                let message;
+                if (error.response && error.response.data) {
+                    if (error.response.data.message.includes("undefined local variable or method `upfile_updated'")) {
+                        return {
+                            success: true,
+                            message: 'False negative detected. Api returns error but file was removed.',
+                        };
+                    }
+
+                    message = error.response.data.message ?? error.response.data.error;
+                } else {
+                    message = 'Unable to send request to server. Tray again in few moments...';
                 }
 
                 return {
                     success: false,
-                    message: error.response.data.message,
+                    message,
                 };
             });
     }
