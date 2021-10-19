@@ -17,7 +17,7 @@ export function download() {
 
             if (!resultLoadFile.success) {
                 logMessage('error', resultLoadFile.message, true);
-                process.exit();
+                process.exit(1);
             }
 
             const { key, password, themeId } = resultLoadFile.config;
@@ -31,7 +31,7 @@ export function download() {
 
                 if (!themeAssetsResults.success) {
                     logMessage('error', `Error from api': ${themeAssetsResults.message}`, true);
-                    process.exit();
+                    process.exit(1);
                 }
 
                 assets = themeAssetsResults.assets.map(({ path }: any) => path);

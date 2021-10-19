@@ -16,7 +16,7 @@ export function themes() {
 
             if (!resultLoadFile.success) {
                 logMessage('error', resultLoadFile.message, true);
-                process.exit();
+                process.exit(1);
             }
 
             const { key, password } = resultLoadFile.config;
@@ -26,7 +26,7 @@ export function themes() {
 
             if (!themesResult.success) {
                 logMessage('error', themesResult.message, true);
-                process.exit();
+                process.exit(1);
             }
 
             logMessage('success', 'Themes available:', true);

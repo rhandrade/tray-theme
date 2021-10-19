@@ -24,7 +24,7 @@ export function upload() {
                     `Upload command with core option could not be used together with files parameter.`,
                     true
                 );
-                process.exit();
+                process.exit(1);
             }
 
             if (options.core) {
@@ -65,7 +65,7 @@ export function upload() {
 
             if (!resultLoadFile.success) {
                 logMessage('error', resultLoadFile.message, true);
-                process.exit();
+                process.exit(1);
             }
 
             const { key, password, themeId } = resultLoadFile.config;

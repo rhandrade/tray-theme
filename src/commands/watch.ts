@@ -11,7 +11,7 @@ export function watch() {
 
         if (!resultLoadFile.success) {
             logMessage('error', resultLoadFile.message, true);
-            process.exit();
+            process.exit(1);
         }
 
         const { key, password, themeId } = resultLoadFile.config;

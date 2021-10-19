@@ -64,7 +64,7 @@ export function configure() {
 
             if (!resultCheckConfig.success) {
                 logMessage('error', 'Incorrect API key, password or theme id. Please verify and try again.', true);
-                process.exit();
+                process.exit(1);
             }
 
             logMessage('success', 'Data verified with success.', true);
