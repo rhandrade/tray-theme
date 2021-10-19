@@ -68,14 +68,12 @@ export function watch() {
                     const sendFileResult: any = await api.sendThemeAsset(assetStartingWithSlash, fileContent, isBinary);
 
                     if (!sendFileResult.success) {
-                        console.log(sendFileResult);
                         logMessage(
                             'error',
                             `Error when uploading file ${chalk.magenta(asset)}. Error: ${sendFileResult.message}`,
                             true
                         );
                     } else {
-                        console.log(sendFileResult);
                         logMessage('success', `File ${chalk.magenta(asset)} uploaded`, true);
                     }
                 } else if (message) {
