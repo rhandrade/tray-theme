@@ -16,7 +16,7 @@ export function cleanCache() {
 
             if (!resultLoadFile.success) {
                 logMessage('error', resultLoadFile.message, true);
-                process.exit();
+                process.exit(1);
             }
 
             const { key, password, themeId } = resultLoadFile.config;
@@ -28,7 +28,7 @@ export function cleanCache() {
 
             if (!cleanCacheResult.success) {
                 logMessage('error', `Error from api: ${cleanCacheResult.message}`, true);
-                process.exit();
+                process.exit(1);
             }
 
             logMessage('success', `Cache from theme with id ${theme_id || themeId} cleaned.`, true);

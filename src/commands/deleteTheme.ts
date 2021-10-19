@@ -35,7 +35,7 @@ export function deleteTheme() {
 
             if (!resultLoadFile.success) {
                 logMessage('error', resultLoadFile.message, true);
-                process.exit();
+                process.exit(1);
             }
 
             logMessage('pending', `Deleting theme with id ${chalk.magenta(theme_id)} on store...`);
@@ -47,7 +47,7 @@ export function deleteTheme() {
 
             if (!deleteResult.success) {
                 logMessage('error', `Error from api: ${deleteResult.message}`, true);
-                process.exit();
+                process.exit(1);
             }
 
             if (deleteResult.message) {

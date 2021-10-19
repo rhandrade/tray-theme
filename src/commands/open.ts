@@ -8,7 +8,7 @@ export function open() {
 
         if (!resultLoadFile.success) {
             logMessage('error', resultLoadFile.message, true);
-            process.exit();
+            process.exit(1);
         }
 
         const { previewUrl } = resultLoadFile.config;

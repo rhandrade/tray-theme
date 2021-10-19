@@ -92,9 +92,11 @@ tray download
 tray download elements/footer.html elements/header.html
 ```
 
-### tray upload [files...]
+### tray upload [options] [files...]
 
 Envia os arquivos do tema para os servidores da Tray. O parâmetro `files` pode receber vários arquivos, basta separá-los com espaço. Se nenhum arquivo for específicado todos os arquivos do tema são enviados.
+
+Esse comando também aceita opções que modificam o comportamento do comando. A única opção disponível é a `-c` ou sua versão extendida `--core`. Com isso, somente os arquivos principais são enviados, ou seja, desconsidera o arquivo `settings.json` e a pasta de imagens. **Atenção:** essa opção não pode ser usada em conjunto com o parâmetro `files`. Caso os dois sejam usados, um erro será retornado.
 
 ```sh
 # Envia todos os arquivos do tema
@@ -102,6 +104,10 @@ tray upload
 
 # Envia somente os arquivos footer.html e header.html da pasta elements
 tray upload elements/footer.html elements/header.html
+
+# Envia somente os arquivos principais do tema, sem imagens ou configurações do tema
+tray upload -c
+tray upload --core
 ```
 
 ### tray delete-file <files...>

@@ -22,7 +22,7 @@ export function newTheme() {
 
             if (!resultCheckConfig.success) {
                 logMessage('error', 'Api key or password not correctly. Please verify and tray again.', true);
-                process.exit();
+                process.exit(1);
             }
 
             if (theme_base) {
@@ -41,7 +41,7 @@ export function newTheme() {
 
             if (!resultCreationTheme.success) {
                 logMessage('error', resultCreationTheme.message, true);
-                process.exit();
+                process.exit(1);
             }
 
             logMessage('success', `Theme ${theme_name} created on store.`, true);
