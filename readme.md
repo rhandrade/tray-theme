@@ -6,6 +6,10 @@
 
 Interface de linha de comando desenvolvida em Node.js e TypeScript para ajudar desenvolvedores a criarem ótimos temas para Tray.
 
+### :rotating_light: Pacote descontinuado :rotating_light:
+Com o lançamento da nova ferramenta oficial da Tray, o [Tray CLI](https://github.com/tray-tecnologia/tray-cli), esse pacote será arquivado e seu desenvolvimento descontinuado. Obrigado a todos que contribuiram com o projeto.
+
+
 ## Índice
 
 -   [Instalação](#instalação)
